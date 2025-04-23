@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+    <gazebo>
+        <plugin
+            filename="gz-sim-contact-system"
+            name="gz::sim::systems::Contact">
+        </plugin>
+        <plugin
+            filename="gz-sim-joint-state-publisher-system"
+            name="gz::sim::systems::JointStatePublisher">
+        </plugin>
+        
+        <plugin
+            filename="gz-sim-joint-controller-system"
+            name="gz::sim::systems::JointController">
+            <joint_name>hip_joint</joint_name>
+            <use_force_commands>true</use_force_commands>
+            <inital_velocity>0</inital_velocity>
+            <sub_topic>joint/hip_joint/0/cmd_torque</sub_topic>
+        </plugin>
+
+        <plugin
+            filename="gz-sim-joint-controller-system"
+            name="gz::sim::systems::JointController">
+            <joint_name>knee_joint</joint_name>
+            <use_force_commands>true</use_force_commands>
+            <inital_velocity>0</inital_velocity>
+            <sub_topic>joint/knee_joint/0/cmd_torque</sub_topic>
+        </plugin>
+
+        <sensor name="contact" type="contact">
+            <always_on>true</always_on>
+            <update_rate>10.0</update_rate>
+            <visualize>true</visualize>
+            <contact>
+                <collision>foot</collision>
+                <!-- <topic></topic> -->
+            </contact>
+        </sensor>
+    </gazebo>
+</robot>

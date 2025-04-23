@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+    <link name="world">
+    </link>
+
+    <joint name="slider_joint" type="prismatic">
+        <parent link="world" />
+        <child link="base_link" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <axis xyz="0 0 1" />
+        <limit effort="0" lower="0" upper="2" velocity="100.0" />
+        <dynamics damping="0.0" friction="0.1" />
+    </joint>
+
+    <link name="base_link">
+        <inertial>
+            <mass value="0.01" />
+            <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+        </inertial>
+    </link>
+
+    <joint name="hip_joint" type="revolute">
+        <parent link="base_link" />
+        <child link="hip" />
+        <origin xyz="0 0 0" rpy="${pi/2} -${pi/2} 0" />
+        <axis xyz="0 0 1" />
+        <limit effort="10.5" lower="-${pi}" upper="${pi}" velocity="62.9" />
+        <dynamics damping="0.1" friction="0.1" />
+    </joint>
+
+    <link name="hip">
+        <visual>
+            <origin xyz="-0.15 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.3 0.05 0.02" />
+            </geometry>
+            <material name="blue">
+                <color rgba="0 0 1 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="-0.15 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.3 0.05 0.02" />
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="1" />
+            <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+        </inertial>
+    </link>
+
+    <joint name="knee_joint" type="revolute">
+        <parent link="hip" />
+        <child link="knee" />
+        <origin xyz="-0.3 0 0" rpy="0 0 0" />
+        <axis xyz="0 0 1" />
+        <limit effort="10.5" lower="-${pi}" upper="${pi}" velocity="62.9" />
+        <dynamics damping="0.1" friction="0.1" />
+    </joint>
+
+    <link name="knee">
+        <visual>
+            <origin xyz="-0.125 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.25 0.05 0.02" />
+            </geometry>
+            <material name="green">
+                <color rgba="0 1 0 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="-0.125 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.25 0.05 0.02" />
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="1" />
+            <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+        </inertial>
+    </link>
+
+    <joint name="contact_joint" type="fixed">
+        <parent link="knee" />
+        <child link="foot" />
+        <origin xyz="-0.25 0 0" rpy="0 0 0" />
+        <axis xyz="0 0 1" />
+    </joint>
+
+    <link name="foot">
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.05" />
+            </geometry>
+        </collision>
+    </link>
+
+    <xacro:include filename="$(find robot_description)/description/simulation.xacro" />
+
+</robot>
