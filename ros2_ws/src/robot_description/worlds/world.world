@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<sdf version="1.6">
+<sdf version="1.11">
   <world name="default">
     <plugin
       filename="gz-sim-physics-system"
@@ -18,8 +18,11 @@
       name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
+    <plugin
+      filename="gz-sim-contact-system"
+      name="gz::sim::systems::Contact">
+    </plugin>
 
-    <!-- Gazebo imu plugin handles all imu stuff -->
     <plugin
       filename="gz-sim-imu-system"
       name="gz::sim::systems::Imu">
@@ -27,8 +30,8 @@
 
     <model name="ground_plane">
       <static>true</static>
-      <link name="link">
-        <visual name="ground_plane">
+      <link name="ground">
+        <visual name="visual">
           <geometry>
             <plane>
               <size>2 2</size>
@@ -41,7 +44,7 @@
             <specular>0 0 1 0.5</specular>
           </material>
         </visual>
-        <collision name="ground_collision">
+        <collision name="collision">
           <geometry>
             <plane>
               <size>2 2</size>
@@ -60,6 +63,7 @@
       </link>
     </model>
 
+
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun
@@ -77,8 +81,8 @@
     </gui>
 
     <physics type="ode">
-      <real_time_update_rate>100.0</real_time_update_rate>
-      <max_step_size>0.01</max_step_size>
+      <real_time_update_rate>1000.0</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
     </physics>
 

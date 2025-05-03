@@ -58,7 +58,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': '-g -v4 '}.items()
+        launch_arguments={'gz_args': '-g -v2 '}.items()
     )
 
     bridge_params = os.path.join(
@@ -83,7 +83,7 @@ def generate_launch_description():
                         arguments=['-topic', 'robot_description',
                                    '-x', '0.0', 
                                    '-y', '0.0',
-                                   '-z', '0.1',
+                                   '-z', '0.0',
                                    ],
                         output='screen')
 

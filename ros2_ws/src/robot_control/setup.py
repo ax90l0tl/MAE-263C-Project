@@ -19,6 +19,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'robot_description_parser = robot_control.robot_parser:main',
         ],
     },
 )

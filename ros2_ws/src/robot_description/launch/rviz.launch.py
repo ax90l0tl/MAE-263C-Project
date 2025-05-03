@@ -32,11 +32,22 @@ def generate_launch_description():
     )
 
     # Need joint state publisher for continuous and revolute joints
-    joint_robot_state_publisher = Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
+    joint_robot_state_publisher_gui = Node(
+        package='joint_state_publisher_gui',
+        executable='joint_state_publisher_gui',
         output='screen',
-        parameters=[params]
+    )
+
+    # Path to the RViz configuration file
+    rviz_config_file = os.path.join(pkg_path, 'rviz', 'rviz.rviz')
+
+    # Add RViz node
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config_file]  # Specify the RViz config file
     )
 
     # Launch!
@@ -47,5 +58,6 @@ def generate_launch_description():
             description='Use sim time if true'),
 
         node_robot_state_publisher,
-        # joint_robot_state_publisher
+        joint_robot_state_publisher_gui,
+        rviz_node
     ])

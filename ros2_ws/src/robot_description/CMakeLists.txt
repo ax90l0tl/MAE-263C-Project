@@ -15,7 +15,7 @@ find_package(ros_gz_bridge REQUIRED)
 find_package(ros_gz_sim REQUIRED)
 
 install(
-  DIRECTORY description launch meshes worlds config rviz
+  DIRECTORY description launch worlds config rviz
   DESTINATION share/${PROJECT_NAME}
 )
 

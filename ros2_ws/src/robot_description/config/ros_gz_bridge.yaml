@@ -1,19 +1,30 @@
-- ros_topic_name: "clock"
-  gz_topic_name: "clock"
+- ros_topic_name: "/clock"
+  gz_topic_name: "/clock"
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"
   direction: GZ_TO_ROS
 
 # gz topic published by JointState plugin
 - ros_topic_name: "/joint_states"
-  gz_topic_name: "/world/default/model/robot/joint_state"
+  gz_topic_name: "model/robot/joint_states"
   ros_type_name: "sensor_msgs/msg/JointState"
   gz_type_name: "gz.msgs.Model"
   direction: GZ_TO_ROS
 
-# # gz topic published by IMU plugin
-# - ros_topic_name: "imu"
-#   gz_topic_name: "imu"
-#   ros_type_name: "sensor_msgs/msg/Imu"
-#   gz_type_name: "gz.msgs.IMU"
-#   direction: GZ_TO_ROS
+- ros_topic_name: "/hip_joint/cmd_torque"
+  gz_topic_name: "model/robot/joint/hip_joint/0/cmd_torque"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/knee_joint/cmd_torque"
+  gz_topic_name: "model/robot/joint/knee_joint/0/cmd_torque"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "contact"
+  gz_topic_name: "model/robot/contact"
+  ros_type_name: "std_msgs/msg/Bool"
+  gz_type_name: "gz.msgs.Boolean"
+  direction: GZ_TO_ROS
