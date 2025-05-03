@@ -1,0 +1,49 @@
+# Python cache and bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment (assumes it's created inside the subdir)
+venv/
+.env/
+.venv/
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test output and coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# pytest
+.pytest_cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Logs
+*.log
+
+# Environment variables and secrets
+.env.*
+*.env
+
+# OS-specific
+.DS_Store
+Thumbs.db
