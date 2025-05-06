@@ -1,5 +1,98 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    
+    <link name="imu_link"></link>
+    <joint name="imu_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="imu_link" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+    <gazebo reference="imu_link">
+        <sensor name="imu" type="imu">
+            <always_on>true</always_on>
+            <update_rate>100.0</update_rate>
+            <visualize>true</visualize>
+            <topic>/model/robot/sensors/imu</topic>
+            <gz_frame_id>imu_link</gz_frame_id>
+            <imu>
+                <!-- noise statistics -->
+                <!-- <angular_velocity>
+                <x>
+                    <noise type="gaussian">
+                      <mean>0</mean>
+                      <stddev>0.009</stddev>
+                      <bias_mean>0.00075</bias_mean>
+                      <bias_stddev>0.005</bias_stddev>
+                      <dynamic_bias_stddev>0.00002</dynamic_bias_stddev>
+                      <dynamic_bias_correlation_time>400.0</dynamic_bias_correlation_time>
+                      <precision>0.00025</precision>
+                    </noise>
+                  </x>
+                  <y>
+                    <noise type="gaussian">
+                      <mean>0</mean>
+                      <stddev>0.009</stddev>
+                      <bias_mean>0.00075</bias_mean>
+                      <bias_stddev>0.005</bias_stddev>
+                      <dynamic_bias_stddev>0.00002</dynamic_bias_stddev>
+                      <dynamic_bias_correlation_time>400.0</dynamic_bias_correlation_time>
+                      <precision>0.00025</precision>
+                    </noise>
+                  </y>
+                  <z>
+                    <noise type="gaussian">
+                      <mean>0</mean>
+                      <stddev>0.009</stddev>
+                      <bias_mean>0.00075</bias_mean>
+                      <bias_stddev>0.005</bias_stddev>
+                      <dynamic_bias_stddev>0.00002</dynamic_bias_stddev>
+                      <dynamic_bias_correlation_time>400.0</dynamic_bias_correlation_time>
+                      <precision>0.00025</precision>
+                    </noise>
+                  </z>
+                </angular_velocity>
+                <linear_acceleration>
+                  <x>
+                    <noise type="gaussian">
+                      <mean>0</mean>
+                      <stddev>0.021</stddev>
+                      <bias_mean>0.05</bias_mean>
+                      <bias_stddev>0.0075</bias_stddev>
+                      <dynamic_bias_stddev>0.000375</dynamic_bias_stddev>
+                      <dynamic_bias_correlation_time>175.0</dynamic_bias_correlation_time>
+                      <precision>0.005</precision>
+                    </noise>
+                  </x>
+                  <y>
+                    <noise type="gaussian">
+                      <mean>0</mean>
+                      <stddev>0.021</stddev>
+                      <bias_mean>0.05</bias_mean>
+                      <bias_stddev>0.0075</bias_stddev>
+                      <dynamic_bias_stddev>0.000375</dynamic_bias_stddev>
+                      <dynamic_bias_correlation_time>175.0</dynamic_bias_correlation_time>
+                      <precision>0.005</precision>
+                    </noise>
+                  </y>
+                  <z>
+                    <noise type="gaussian">
+                      <mean>0</mean>
+                      <stddev>0.021</stddev>
+                      <bias_mean>0.05</bias_mean>
+                      <bias_stddev>0.0075</bias_stddev>
+                      <dynamic_bias_stddev>0.000375</dynamic_bias_stddev>
+                      <dynamic_bias_correlation_time>175.0</dynamic_bias_correlation_time>
+                      <precision>0.005</precision>
+                    </noise>
+                  </z>
+                </linear_acceleration> -->
+                <orientation_reference_frame>
+                  <localization>ENU</localization>
+                </orientation_reference_frame>
+            </imu>
+        </sensor>
+    </gazebo>
+
     <gazebo>
         <plugin
             filename="gz-sim-joint-state-publisher-system"
@@ -8,59 +101,21 @@
             <joint_name>hip_joint</joint_name>
             <joint_name>knee_joint</joint_name>
         </plugin>
-
         <plugin
-            filename="gz-sim-joint-controller-system"
-            name="gz::sim::systems::JointController">
-            <joint_name>hip_joint</joint_name>
-            <use_force_commands>true</use_force_commands>
-            <inital_velocity>0</inital_velocity>
-            <sub_topic>joint/hip_joint/0/cmd_torque</sub_topic>
-            <p_gain>1.0</p_gain>
-            <i_gain>0.0</i_gain>
-            <d_gain>0.1</d_gain>
-            <i_max>1</i_max>
-            <i_min>-1</i_min>
-            <cmd_max>100</cmd_max>
-            <cmd_min>-100</cmd_min>
-            <cmd_offset>0.0</cmd_offset>
+            filename="gz-sim-contact-system"
+            name="gz::sim::systems::Contact">
         </plugin>
 
-        <plugin
-            filename="gz-sim-joint-controller-system"
-            name="gz::sim::systems::JointController">
-            <joint_name>knee_joint</joint_name>
-            <use_force_commands>true</use_force_commands>
-            <inital_velocity>0</inital_velocity>
-            <sub_topic>joint/knee_joint/0/cmd_torque</sub_topic>
-            <p_gain>1.0</p_gain>
-            <i_gain>0.0</i_gain>
-            <d_gain>0.1</d_gain>
-            <i_max>1</i_max>
-            <i_min>-1</i_min>
-            <cmd_max>100</cmd_max>
-            <cmd_min>-100</cmd_min>
-            <cmd_offset>0.0</cmd_offset>
-        </plugin>
     </gazebo>
 
-
-    <gazebo reference="foot">
-        <sensor name="contact_sensor" type="contact">
+    <gazebo reference="foot_link">
+        <sensor name='foot_contact' type='contact'>
             <always_on>true</always_on>
-            <update_rate>10.0</update_rate>
-            <visualize>true</visualize>
+            <update_rate>100.0</update_rate>
             <contact>
                 <collision>foot_collision</collision>
-                <topic>/model/robot/contact</topic>
+                <topic>/model/robot/sensors/contact</topic>
             </contact>
         </sensor>
-
-        <plugin filename="gz-sim-touchplugin-system"
-            name="gz::sim::systems::TouchPlugin">
-            <target>collision</target>
-            <time>0.001</time>
-            <enabled>true</enabled>
-        </plugin>
     </gazebo>
 </robot>

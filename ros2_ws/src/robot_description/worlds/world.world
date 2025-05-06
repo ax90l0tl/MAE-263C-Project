@@ -18,10 +18,6 @@
       name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
-    <plugin
-      filename="gz-sim-contact-system"
-      name="gz::sim::systems::Contact">
-    </plugin>
 
     <plugin
       filename="gz-sim-imu-system"
@@ -54,8 +50,8 @@
           <surface>
             <friction>
               <ode>
-                <mu>1.0</mu>
-                <mu2>1.0</mu2>
+                <mu>0.1</mu>
+                <mu2>0.0</mu2>
               </ode>
             </friction>
           </surface>
@@ -79,7 +75,7 @@
         <pose>0 0 0 0 0 0</pose>
       </camera>
     </gui>
-
+    
     <physics type="ode">
       <real_time_update_rate>1000.0</real_time_update_rate>
       <max_step_size>0.001</max_step_size>

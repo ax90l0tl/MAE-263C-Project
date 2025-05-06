@@ -15,7 +15,7 @@ def generate_launch_description():
     default_world = os.path.join(
         get_package_share_directory('robot_description'),
         'worlds',
-        'world.world'
+        'test.sdf'
     )
 
     namespace = LaunchConfiguration('name')
@@ -42,7 +42,9 @@ def generate_launch_description():
     robot_desc = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
                     get_package_share_directory(package_name),'launch','demo.launch.py'
-                )]), launch_arguments={'use_sim_time': 'true'}.items()
+                )]), launch_arguments={'use_sim_time': 'true',
+                                       'torque_control': 'false',
+                                       'position_control': 'true'}.items()
     )
     
     # Include the Gazebo launch file, provided by the gazebo_ros package
@@ -51,14 +53,14 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': ['-r -s -v4 ', world], 'on_exit_shutdown': 'true'}.items()
+        launch_arguments={'gz_args': ['-r -s -v0 ', world], 'on_exit_shutdown': 'true'}.items()
     )
     
     gzclient_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': '-g -v2 '}.items()
+        launch_arguments={'gz_args': '-g -v0 '}.items()
     )
 
     bridge_params = os.path.join(
@@ -92,7 +94,7 @@ def generate_launch_description():
 
     # Launch them all!
     ld.add_action(start_gazebo_ros_bridge_cmd)
-    ld.add_action(spawn_entity)
+    # ld.add_action(spawn_entity)
     ld.add_action(robot_desc)
     ld.add_action(namespace_arg)
     ld.add_action(set_env_vars_resources)
