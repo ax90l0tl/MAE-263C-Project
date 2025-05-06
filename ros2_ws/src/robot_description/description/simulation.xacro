@@ -113,7 +113,7 @@
             <always_on>true</always_on>
             <update_rate>100.0</update_rate>
             <contact>
-                <collision>foot_collision</collision>
+                <collision>foot_link_collision</collision>
                 <topic>/model/robot/sensors/contact</topic>
             </contact>
         </sensor>

@@ -330,27 +330,10 @@
         </visual>
         <enable_wind>false</enable_wind>
       </link>
-      <joint name='contact_joint' type='revolute'>
+      <joint name='contact_joint' type='fixed'>
         <pose>0 0 0 0 0 0</pose>
         <parent>knee_link</parent>
         <child>foot_link</child>
-        <axis>
-          <xyz>0 0 1</xyz>
-          <limit>
-            <lower>0</lower>
-            <upper>0</upper>
-            <effort>1.0000000000000001e-05</effort>
-            <velocity>1.0000000000000001e-05</velocity>
-            <stiffness>100000000</stiffness>
-            <dissipation>1</dissipation>
-          </limit>
-          <dynamics>
-            <spring_reference>0</spring_reference>
-            <spring_stiffness>0</spring_stiffness>
-            <damping>0</damping>
-            <friction>0</friction>
-          </dynamics>
-        </axis>
       </joint>
       <link name='foot_link'>
         <pose>-0.0034239736735265924 6.7889028380960428e-16 0.47633400835890394 -1.5707963267948919 -1.2360619954356582 3.14159265358979</pose>
