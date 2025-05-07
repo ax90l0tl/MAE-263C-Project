@@ -95,7 +95,8 @@ class URDFParser():
                 })
         return dh_params
 
-# URDFParserNode = URDFParser(package_name='robot_description', urdf_file='robot.urdf.xacro')
-# print(URDFParserNode.get_DH_params())
-# print(URDFParserNode.get_inertial_prop())
-# print(URDFParserNode.get_joint_properties())
+if __name__ == "__main__":
+    URDFParserNode = URDFParser(package_name='robot_description', urdf_file='robot.urdf.xacro')
+    print(URDFParserNode.get_DH_params())
+    print(URDFParserNode.get_inertial_prop())
+    print(URDFParserNode.get_joint_properties())

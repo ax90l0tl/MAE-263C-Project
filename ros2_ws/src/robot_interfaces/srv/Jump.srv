@@ -1,0 +1,4 @@
+bool jump
+---
+bool success
+int64 time

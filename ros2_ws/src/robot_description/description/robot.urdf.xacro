@@ -90,12 +90,14 @@
 
     <!-- This has to be a revolute joint for some dumb reason -->
     <!-- Can also change this manually in the sdf to a fixed joint -->
+    <!-- <joint name="contact_joint" type="fixed"> -->
     <joint name="contact_joint" type="revolute">
         <parent link="knee_link" />
         <child link="foot_link" />
         <origin xyz="${-L2_length} 0 0" rpy="0 0 0" />
         <axis xyz="0 0 1" />
         <limit effort="1e-5" lower="0" upper="0" velocity="1e-5" />
+        <dynamics damping="0.1" friction="0.1" />
     </joint>
 
     <link name="foot_link">

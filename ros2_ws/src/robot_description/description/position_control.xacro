@@ -16,7 +16,7 @@
             <cmd_max>100</cmd_max>
             <cmd_min>-100</cmd_min>
             <cmd_offset>0.0</cmd_offset>
-            <initial_position>-0.3</initial_position>
+            <!-- <initial_position>-0.3</initial_position> -->
         </plugin>
 
         <plugin
@@ -33,7 +33,7 @@
             <cmd_max>100</cmd_max>
             <cmd_min>-100</cmd_min>
             <cmd_offset>0.0</cmd_offset>
-            <initial_position>0.6</initial_position>
+            <!-- <initial_position>0.6</initial_position> -->
         </plugin>
     </gazebo>
 
