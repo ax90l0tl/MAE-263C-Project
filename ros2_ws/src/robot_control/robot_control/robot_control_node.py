@@ -98,10 +98,11 @@ class robot_control_node(Node):
         print("Jump request received")
         if self.state == states['IDLE']:
             self.jump = True
+            response.success = True
         else:
             print("Can't jump rn")
+            response.success = False
         response.time = self.get_clock().now().nanoseconds
-        response.success = True
         return response
 
 def main(args=None):
