@@ -24,6 +24,12 @@
       name="gz::sim::systems::Imu">
     </plugin>
 
+    <!-- contact plugin has to be in world file to intialize properly -->
+    <plugin
+      filename="gz-sim-contact-system"
+      name="gz::sim::systems::Contact">
+    </plugin>
+
     <model name="ground_plane">
       <static>true</static>
       <link name="ground">

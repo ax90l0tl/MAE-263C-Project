@@ -1,22 +1,22 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    
-    <link name="imu_link"></link>
-    <joint name="imu_joint" type="fixed">
-        <parent link="base_link" />
-        <child link="imu_link" />
-        <origin xyz="0 0 0" rpy="0 0 0" />
-    </joint>
-    <gazebo reference="imu_link">
-        <sensor name="imu" type="imu">
-            <always_on>true</always_on>
-            <update_rate>100.0</update_rate>
-            <visualize>true</visualize>
-            <topic>/model/robot/sensors/imu</topic>
-            <gz_frame_id>imu_link</gz_frame_id>
-            <imu>
-                <!-- noise statistics -->
-                <!-- <angular_velocity>
+
+  <link name="imu_link"></link>
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="imu_link" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+  <gazebo reference="imu_link">
+    <sensor name="imu" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100.0</update_rate>
+      <visualize>true</visualize>
+      <topic>/model/robot/sensors/imu</topic>
+      <gz_frame_id>imu_link</gz_frame_id>
+      <imu>
+        <!-- noise statistics -->
+        <!-- <angular_velocity>
                 <x>
                     <noise type="gaussian">
                       <mean>0</mean>
@@ -86,36 +86,35 @@
                     </noise>
                   </z>
                 </linear_acceleration> -->
-                <orientation_reference_frame>
-                  <localization>ENU</localization>
-                </orientation_reference_frame>
-            </imu>
-        </sensor>
-    </gazebo>
+        <orientation_reference_frame>
+          <localization>ENU</localization>
+        </orientation_reference_frame>
+      </imu>
+    </sensor>
+  </gazebo>
+  <gazebo reference="contact_joint">
+    <preserveFixedJoint>True</preserveFixedJoint>
+  </gazebo>
+  <gazebo>
+    <plugin
+      filename="gz-sim-joint-state-publisher-system"
+      name="gz::sim::systems::JointStatePublisher">
+      <topic>model/robot/joint_states</topic>
+      <joint_name>hip_joint</joint_name>
+      <joint_name>knee_joint</joint_name>
+    </plugin>
+  </gazebo>
 
-    <gazebo>
-        <plugin
-            filename="gz-sim-joint-state-publisher-system"
-            name="gz::sim::systems::JointStatePublisher">
-            <topic>model/robot/joint_states</topic>
-            <joint_name>hip_joint</joint_name>
-            <joint_name>knee_joint</joint_name>
-        </plugin>
-        <plugin
-            filename="gz-sim-contact-system"
-            name="gz::sim::systems::Contact">
-        </plugin>
 
-    </gazebo>
-
-    <gazebo reference="foot_link">
-        <sensor name='foot_contact' type='contact'>
-            <always_on>true</always_on>
-            <update_rate>100.0</update_rate>
-            <contact>
-                <collision>foot_link_collision</collision>
-                <topic>/model/robot/sensors/contact</topic>
-            </contact>
-        </sensor>
-    </gazebo>
+  <gazebo reference="foot_link">
+    <sensor name='foot_contact' type='contact'>
+      <always_on>true</always_on>
+      <update_rate>500.0</update_rate>
+      <contact>
+        <collision>foot_link_collision</collision>
+        <!-- <collision>foot_link_fixed_joint_lump__foot_collision_collision</collision> -->
+        <topic>/model/robot/sensors/contact</topic>
+      </contact>
+    </sensor>
+  </gazebo>
 </robot>

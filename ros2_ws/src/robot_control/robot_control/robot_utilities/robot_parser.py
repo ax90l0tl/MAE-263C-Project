@@ -4,6 +4,10 @@ import os
 import subprocess
 from ament_index_python.packages import get_package_share_directory
 
+
+# loads the URDF file and parses it to extract inertial properties, joint properties, and DH parameters
+# doesn't require ROS2 but you will need to have a ros2 workspace setup to find packages and stuff
+
 class URDFParser():
     def __init__(self, package_name='robot_description', urdf_file='robot.urdf'):
 
@@ -34,6 +38,9 @@ class URDFParser():
             print(f"Error output: {e.stderr}")
             raise
     
+    '''Returns a list of dictionaries containing the inertial properties of each link in the robot model.
+    Each dictionary contains the link name, mass, inertia matrix, and center of mass (com) of the link.
+    The inertia matrix is a 3x3 numpy array, and the com is a 3-element numpy array.'''
     def get_inertial_prop(self):
         inertial_properties = []
         for link in self.robot.links:
@@ -52,6 +59,9 @@ class URDFParser():
                 })
         return inertial_properties
     
+    '''Returns a list of dictionaries containing the joint properties of each joint in the robot model.
+    Each dictionary contains the joint name, lower limit, upper limit, effort, velocity, damping, and friction of the joint.'''
+    
     def get_joint_properties(self):
         joint_properties = []
         for joint in self.robot.joints:
@@ -67,6 +77,9 @@ class URDFParser():
                 })
         return joint_properties
 
+    '''Returns a list of dictionaries containing the Denavit-Hartenberg parameters for each joint in the robot model.
+    Each dictionary contains the joint name, type, alpha, a, theta, d, and offset of the joint.
+    '''
     def get_DH_params(self):
         dh_params = []
         for joint in self.robot.joints:
@@ -91,7 +104,7 @@ class URDFParser():
                     'theta': theta,
                     'd': d,
                     'offset': joint.origin.rpy[1],
-                    'T': T,
+                    # 'T': T,
                 })
         return dh_params
 

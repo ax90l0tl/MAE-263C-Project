@@ -7,7 +7,6 @@ from launch.substitutions import LaunchConfiguration, Command
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
 
-import xacro
 
 
 def generate_launch_description():
@@ -20,10 +19,10 @@ def generate_launch_description():
     # Process the URDF file
     pkg_path = os.path.join(get_package_share_directory('robot_description'))
     xacro_file = os.path.join(pkg_path,'description','robot.urdf.xacro')
-    # robot_description_config = xacro.process_file(xacro_file)
     
     # Create a robot_state_publisher node
-    robot_description_config = Command(['xacro ', xacro_file, ' sim_mode:=', use_sim_time,
+    robot_description_config = Command(['xacro ', xacro_file, 
+                                        ' use_sim_time:=', use_sim_time,
                                         ' torque_control:=', torque_control,
                                         ' position_control:=', position_control,
                                         ' use_sim_time:=', use_sim_time])

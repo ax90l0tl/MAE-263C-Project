@@ -8,15 +8,14 @@
             <joint_name>hip_joint</joint_name>
             <use_force_commands>true</use_force_commands>
             <sub_topic>joint/hip_joint/0/cmd_pos</sub_topic>
-            <p_gain>200.0</p_gain>
-            <i_gain>0.0</i_gain>
-            <d_gain>50.0</d_gain>
-            <i_max>1</i_max>
-            <i_min>-1</i_min>
+            <p_gain>5000.0</p_gain>
+            <i_gain>1.0</i_gain>
+            <d_gain>500.0</d_gain>
+            <i_max>100</i_max>
+            <i_min>-100</i_min>
             <cmd_max>100</cmd_max>
             <cmd_min>-100</cmd_min>
             <cmd_offset>0.0</cmd_offset>
-            <!-- <initial_position>-0.3</initial_position> -->
         </plugin>
 
         <plugin
@@ -25,15 +24,14 @@
             <joint_name>knee_joint</joint_name>
             <use_force_commands>true</use_force_commands>
             <sub_topic>joint/knee_joint/0/cmd_pos</sub_topic>
-            <p_gain>100.0</p_gain>
-            <i_gain>0.0</i_gain>
-            <d_gain>10.0</d_gain>
-            <i_max>1</i_max>
-            <i_min>-1</i_min>
+            <p_gain>5000.0</p_gain>
+            <i_gain>1.0</i_gain>
+            <d_gain>500.0</d_gain>
+            <i_max>100</i_max>
+            <i_min>-100</i_min>
             <cmd_max>100</cmd_max>
             <cmd_min>-100</cmd_min>
             <cmd_offset>0.0</cmd_offset>
-            <!-- <initial_position>0.6</initial_position> -->
         </plugin>
     </gazebo>
 

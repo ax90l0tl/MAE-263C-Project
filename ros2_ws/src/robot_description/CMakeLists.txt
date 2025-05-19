@@ -15,9 +15,10 @@ find_package(ros_gz_bridge REQUIRED)
 find_package(ros_gz_sim REQUIRED)
 
 install(
-  DIRECTORY description launch worlds config rviz
+  DIRECTORY description launch worlds config rviz meshes
   DESTINATION share/${PROJECT_NAME}
 )
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

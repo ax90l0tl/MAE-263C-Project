@@ -15,7 +15,7 @@ class Robot:
         """
         Calculate the forward kinematics of the robot.
         :param joint_angles: List of joint angles.
-        :return: Transformation matrix of the end effector.
+        :return: Transformation matrix of the end effector (4x4 numpy).
         """
         T = np.eye(4)
         for i, joint in enumerate(self.dh_params):
@@ -43,7 +43,7 @@ class Robot:
         """
         Calculate the inverse kinematics of the robot.
         :param target_position: Target position of the end effector in homogenous matrix.
-        :return: List of joint angles.
+        :return: List of joint angles (2x2 numpy).
         """
 
         x = target_position[0]
@@ -83,7 +83,23 @@ class Robot:
         :param joint_angles: List of joint angles.
         :return: Jacobian matrix.
         """
-        J = np.zeros((6, len(self.joint_properties)))
+
+        # Everything in XZ frame
+        # X forward, Z up
+        # Default position of the leg is pointing down
+        # Positive angle points the leg forward
+        a1 = np.abs(self.dh_params[2]['a'])
+        a2 = np.abs(self.dh_params[3]['a'])
+        q1 = joint_angles[0]
+        q2 = joint_angles[1]
+
+        J = np.zeros((6, 2))
+        J[0, 0] = a2*np.cos(q1 + q2) + a1*np.cos(q1)
+        J[0, 1] = a2*np.cos(q1 + q2)
+        J[2, 0] = a2*np.sin(q1 + q2) + a1*np.sin(q1)
+        J[2, 1] = a2*np.sin(q1 + q2)
+        J[4, 0] = -1
+        J[4, 1] = -1
         return J
     
 def plot_robot_arm(joint_angles, target_position=[0, 0]):
@@ -128,10 +144,15 @@ def plot_robot_arm(joint_angles, target_position=[0, 0]):
 
 if __name__ == "__main__":
     robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
-    j = robot.inverse_kinematics(np.array([0.1, -0.01]))
-    print(np.rad2deg(j))
+    # print(robot.dh_params)
 
-    plot_robot_arm(j[1], [0.2, 0.2])
-    plot_robot_arm(j[0], [0.2, 0.2])
+    pose = np.array([0.1, -0.01])
+    j = robot.inverse_kinematics(pose)
+
+    print(np.rad2deg(j))
+    print(robot.jacobian([np.pi/2, 0]))
+    
+    plot_robot_arm(j[1], pose)
+    plot_robot_arm(j[0], pose)
     robot.forward_kinematics(j[0])
     robot.forward_kinematics(j[1])
