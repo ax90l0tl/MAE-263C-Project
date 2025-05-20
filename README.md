@@ -12,7 +12,7 @@ All the ROS2 and simulation has been tested on:
 ## Other Packages
 You will also need these ROS2 Packages (rosdep might not work)
 ```
-sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-ros-gz ros-jazzy-rqt qt5ct
+sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-ros-gz ros-jazzy-rqt qt5ct python3-virtualenv python3-colcon-common-extensions
 ```
 
 ## Initial setup
