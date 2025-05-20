@@ -22,7 +22,9 @@ sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-r
    python3 -m virtualenv ros2_venv
    ```
 3. Create `COLCON_IGNORE` file so `colcon build` ignores the venv
+   ```
    touch ros2_venv/COLCON_IGNORE
+   ```
 4. Activate environment
    ```
    source ros2_venv/bin/activate
