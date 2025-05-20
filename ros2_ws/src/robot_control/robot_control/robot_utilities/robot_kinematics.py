@@ -70,8 +70,8 @@ class Robot:
         cos_t1 = (dist_sqrd + l1**2 - l2**2)/(2*l1*dist)
         a = np.arctan2(np.sqrt(1 - cos_t1**2), cos_t1)
         
-        t1 = theta - self.dh_params[1]['offset'] - a
-        t1_alt = theta - self.dh_params[1]['offset'] + a
+        t1 = theta + self.dh_params[1]['offset'] - a
+        t1_alt = theta + self.dh_params[1]['offset'] + a
 
         joint_angles = np.array([[t1, t2],
                                 [t1_alt, t2_alt]])
@@ -166,10 +166,10 @@ if __name__ == "__main__":
     robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
     # print(robot.dh_params)
 
-    pose = np.array([0, -0.3])
+    pose = np.array([0, -0.05])
     j = robot.inverse_kinematics(pose)
 
-    print(np.rad2deg(j))
+    # print(np.rad2deg(j))
     print(robot.jacobian([np.pi/2, 0]))
     
     plot_robot_arm(j[1], pose)

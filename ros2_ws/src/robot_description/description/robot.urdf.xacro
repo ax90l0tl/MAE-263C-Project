@@ -3,8 +3,8 @@
     <xacro:arg name="use_sim_time" default="false" />
     <xacro:arg name="torque_control" default="false" />
     <xacro:arg name="position_control" default="false" />
-    <xacro:property name="L1_length" default="0.3"/>
-    <xacro:property name="L2_length" default="0.25"/>
+    <xacro:property name="L1_length" default="0.093732"/>
+    <xacro:property name="L2_length" default="0.125"/>
     <xacro:property name="max_torque" default="20.1"/>
     <link name="world">
     </link>
@@ -36,9 +36,10 @@
 
     <link name="hip_link">
         <visual>
-            <origin xyz="${L1_length/2} 0 0" rpy="0 0 0" />
+            <!-- <origin xyz="${L1_length/2} 0 0" rpy="0 0 0" /> -->
             <geometry>
-                <box size="${L1_length} 0.05 0.02" />
+                <mesh filename="file://$(find robot_description)/meshes/hip.stl"/>
+                <!-- <box size="${L1_length} 0.05 0.02" /> -->
             </geometry>
             <material name="blue">
                 <color rgba="0 0 1 1" />
@@ -68,9 +69,10 @@
 
     <link name="knee_link">
         <visual>
-            <origin xyz="${L2_length/2} 0 0" rpy="0 0 0" />
+            <!-- <origin xyz="${L2_length/2} 0 0" rpy="0 0 0" /> -->
             <geometry>
-                <box size="${L2_length} 0.05 0.02" />
+                <mesh filename="file://$(find robot_description)/meshes/tibia.stl"/>
+                <!-- <box size="${L2_length} 0.05 0.02" /> -->
             </geometry>
             <material name="green">
                 <color rgba="0 1 0 1" />
@@ -104,7 +106,7 @@
     <link name="foot_link">
         <visual>
             <geometry>
-                <sphere radius="0.05" />
+                <sphere radius="0.01" />
             </geometry>
         </visual>
         <!-- Something is wrong with the urdf/xacro/sdf conversion.
@@ -112,7 +114,7 @@
         <!-- <collision name="foot_collision"> -->
         <collision>
             <geometry>
-                <sphere radius="0.05" />
+                <sphere radius="0.01" />
             </geometry>
         </collision>
         <inertial>
