@@ -39,6 +39,8 @@
             <!-- <origin xyz="${L1_length/2} 0 0" rpy="0 0 0" /> -->
             <geometry>
                 <mesh filename="file://$(find robot_description)/meshes/hip.stl"/>
+                <!-- for preview -->
+                <!-- <mesh filename="../meshes/hip.stl"/> -->
                 <!-- <box size="${L1_length} 0.05 0.02" /> -->
             </geometry>
             <material name="blue">
@@ -46,7 +48,7 @@
             </material>
         </visual>
         <collision>
-            <origin xyz="${-L1_length/2} 0 0" rpy="0 0 0" />
+            <origin xyz="${L1_length/2} 0 0" rpy="0 0 0" />
             <geometry>
                 <box size="${L1_length} 0.05 0.02" />
             </geometry>
@@ -72,6 +74,8 @@
             <!-- <origin xyz="${L2_length/2} 0 0" rpy="0 0 0" /> -->
             <geometry>
                 <mesh filename="file://$(find robot_description)/meshes/tibia.stl"/>
+                <!-- for preview -->
+                <!-- <mesh filename="../meshes/tibia.stl"/> -->
                 <!-- <box size="${L2_length} 0.05 0.02" /> -->
             </geometry>
             <material name="green">
@@ -79,9 +83,9 @@
             </material>
         </visual>
         <collision>
-            <origin xyz="${-L2_length/2} 0 0" rpy="0 0 0" />
+            <origin xyz="${L2_length/2} 0 0" rpy="0 0 0" />
             <geometry>
-                <box size="${L2_length} 0.05 0.02" />
+                <box size="${L2_length} 0.01 0.04" />
             </geometry>
         </collision>
         <inertial>
