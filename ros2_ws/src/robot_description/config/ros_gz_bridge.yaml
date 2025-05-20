@@ -41,7 +41,6 @@
   gz_type_name: "gz.msgs.Contacts"
   direction: GZ_TO_ROS
 
-
 - ros_topic_name: "imu"
   gz_topic_name: "model/robot/sensors/imu"
   ros_type_name: "sensor_msgs/msg/Imu"

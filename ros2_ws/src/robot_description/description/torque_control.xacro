@@ -13,8 +13,8 @@
             <d_gain>0.1</d_gain>
             <i_max>1</i_max>
             <i_min>-1</i_min>
-            <cmd_max>100</cmd_max>
-            <cmd_min>-100</cmd_min>
+            <cmd_max>${max_torque}</cmd_max>
+            <cmd_min>${-max_torque}</cmd_min>
             <cmd_offset>0.0</cmd_offset>
         </plugin>
 
@@ -30,8 +30,8 @@
             <d_gain>0.1</d_gain>
             <i_max>1</i_max>
             <i_min>-1</i_min>
-            <cmd_max>100</cmd_max>
-            <cmd_min>-100</cmd_min>
+            <cmd_max>${max_torque}</cmd_max>
+            <cmd_min>${-max_torque}</cmd_min>
             <cmd_offset>0.0</cmd_offset>
         </plugin>
     </gazebo>

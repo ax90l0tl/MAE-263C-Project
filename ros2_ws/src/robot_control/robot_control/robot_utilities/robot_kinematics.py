@@ -64,11 +64,11 @@ class Robot:
         # use this instead of law of cosines bc of roundoff error at small angles
         sin_t2_2 = (dist_sqrd - (l1-l2)**2) /(4*l1*l2)
         cos_t2 = 1 - 2*sin_t2_2
-        t2 = np.pi - np.atan2(np.sqrt(1 - cos_t2**2), cos_t2)
+        t2 = np.pi - np.arctan2(np.sqrt(1 - cos_t2**2), cos_t2)
         t2_alt = -t2
 
         cos_t1 = (dist_sqrd + l1**2 - l2**2)/(2*l1*dist)
-        a = np.atan2(np.sqrt(1 - cos_t1**2), cos_t1)
+        a = np.arctan2(np.sqrt(1 - cos_t1**2), cos_t1)
         
         t1 = theta - self.dh_params[1]['offset'] - a
         t1_alt = theta - self.dh_params[1]['offset'] + a
@@ -102,6 +102,26 @@ class Robot:
         J[4, 1] = -1
         return J
     
+    def trajectory(self, start, end, steps=10, ):
+        """
+        Generate a trajectory from start to end position.
+        :param start: Start position.
+        :param end: End position.
+        :param steps: Number of steps in the trajectory.
+        :return: List of positions in the trajectory.
+        """
+        x = np.linspace(start[0], end[0], steps)
+        z = np.linspace(start[1], end[1], steps)
+        return np.array([x, z]).T
+
+    def dynamics(self, joint_angles):
+        """
+        Calculate the dynamics of the robot.
+        :param joint_angles: List of joint angles.
+        :return: Mass Matrix, Coriolis Matrix, Gravity Matrix.
+        """
+        
+
 def plot_robot_arm(joint_angles, target_position=[0, 0]):
     """
     Plot the robot arm given joint angles.
@@ -146,7 +166,7 @@ if __name__ == "__main__":
     robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
     # print(robot.dh_params)
 
-    pose = np.array([0.1, -0.01])
+    pose = np.array([0, -0.3])
     j = robot.inverse_kinematics(pose)
 
     print(np.rad2deg(j))
@@ -156,3 +176,4 @@ if __name__ == "__main__":
     plot_robot_arm(j[0], pose)
     robot.forward_kinematics(j[0])
     robot.forward_kinematics(j[1])
+    # print(robot.trajectory([0, 0], [0, -0.01], steps=10))

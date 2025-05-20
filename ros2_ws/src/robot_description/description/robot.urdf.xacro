@@ -28,7 +28,7 @@
     <joint name="hip_joint" type="revolute">
         <parent link="base_link" />
         <child link="hip_link" />
-        <origin xyz="0 0 0" rpy="${pi/2} -${pi/2} 0" />
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi/2} 0" />
         <axis xyz="0 0 1" />
         <limit effort="${max_torque}" lower="-${pi}" upper="${pi}" velocity="62.9" />
         <dynamics damping="0.1" friction="0.1" />
@@ -36,7 +36,7 @@
 
     <link name="hip_link">
         <visual>
-            <origin xyz="${-L1_length/2} 0 0" rpy="0 0 0" />
+            <origin xyz="${L1_length/2} 0 0" rpy="0 0 0" />
             <geometry>
                 <box size="${L1_length} 0.05 0.02" />
             </geometry>
@@ -60,7 +60,7 @@
     <joint name="knee_joint" type="revolute">
         <parent link="hip_link" />
         <child link="knee_link" />
-        <origin xyz="${-L1_length} 0 0" rpy="0 0 0" />
+        <origin xyz="${L1_length} 0 0" rpy="0 0 0" />
         <axis xyz="0 0 1" />
         <limit effort="${max_torque}" lower="-${pi}" upper="${pi}" velocity="62.9" />
         <dynamics damping="0.1" friction="0.1" />
@@ -68,7 +68,7 @@
 
     <link name="knee_link">
         <visual>
-            <origin xyz="${-L2_length/2} 0 0" rpy="0 0 0" />
+            <origin xyz="${L2_length/2} 0 0" rpy="0 0 0" />
             <geometry>
                 <box size="${L2_length} 0.05 0.02" />
             </geometry>
@@ -95,7 +95,7 @@
     <!-- <joint name="contact_joint" type="revolute"> -->
         <parent link="knee_link" />
         <child link="foot_link" />
-        <origin xyz="${-L2_length} 0 0" rpy="0 0 0" />
+        <origin xyz="${L2_length} 0 0" rpy="0 0 0" />
         <axis xyz="0 0 1" />
         <limit effort="1e-5" lower="0" upper="0" velocity="1e-5" />
         <dynamics damping="0.0" friction="0.0" />
