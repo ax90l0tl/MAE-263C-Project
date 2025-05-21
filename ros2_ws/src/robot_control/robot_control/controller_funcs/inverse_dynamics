@@ -1,0 +1,21 @@
+import numpy as np
+from dyn_model import DynamicModel
+from robot_utilities import Robot
+
+def inv_d(q ,q_des, dynamics, gains): # Gets called every control loop
+    """ q is 2Nx1 vector of feedback joint angles and velocity [q q_dot ] """
+    """ q_des is 2Nx1 vector of feedback joint angles and velocity [q_des q_dot_des] """
+    """ gains is Nx2N vector of feedback gains [Kp Kd] (Alternatively, 1xN vector of feedback gains [[Kp] [Kd]] where Kp/Kd are NxN matrices) """
+    e = q_des- q # e = [q_des - q, q_dot_des - q_dot]
+    y = gains[0] @ e[0:2] + gains[1] @ e[2:4] # q_ddot_des
+    u = dynamics.inertia_matrix(q[0:2]) @ y + dynamics.nonlinear_vector(q[0:2], q[2:4]) + dynamics.friction_model(q[0:2], q[2:4])
+    
+    return u
+
+def grav_comp(q,q_set,dynamics, gains):
+    """ q is 2Nx1 vector of feedback joint angles and velocity [q q_dot ] """
+    """ q_set is Nx1 vector of feedback joint angles and velocity [q_set1 q_set2] """
+    """ gains is Nx2N vector of feedback gains [Kp Kd] (Alternatively, 1xN vector of feedback gains [[Kp] [Kd]] where Kp/Kd are NxN matrices) """
+    e = np.array([q_set , 0 , 0]).reshape(len(q),1)- q # e = [q_des - q, q_dot_des - q_dot]
+    
+    return u
