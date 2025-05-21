@@ -84,6 +84,7 @@ class Robot:
         :return: Jacobian matrix.
         """
         J = np.zeros((6, len(self.joint_properties)))
+        
         return J
     
 def plot_robot_arm(joint_angles, target_position=[0, 0]):
