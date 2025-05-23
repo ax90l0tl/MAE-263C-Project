@@ -94,12 +94,12 @@ class Robot:
         q2 = joint_angles[1]
 
         J = np.zeros((6, 2))
-        J[0, 0] = a2*np.cos(q1 + q2) + a1*np.cos(q1)
-        J[0, 1] = a2*np.cos(q1 + q2)
+        J[0, 0] = -a2*np.cos(q1 + q2) - a1*np.cos(q1)
+        J[0, 1] = -a2*np.cos(q1 + q2)
         J[2, 0] = a2*np.sin(q1 + q2) + a1*np.sin(q1)
         J[2, 1] = a2*np.sin(q1 + q2)
-        J[4, 0] = -1
-        J[4, 1] = -1
+        J[4, 0] = 1
+        J[4, 1] = 1
         return J
     
     def trajectory(self, start, end, steps=10, ):
