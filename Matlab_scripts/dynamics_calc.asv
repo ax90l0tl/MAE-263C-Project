@@ -8,14 +8,15 @@ syms t1 t2 t3 m_1 m_2 m_3 t1d t2d t3d t1dd t2dd t3dd g
 syms a1 a2
 % a1 = 0.3;
 % a2 = 0.25;
-L(1) = Link('revolute','d', 0, 'a', 0, 'alpha', pi/2 ,'modified', 'offset', -pi/2);
+L(1) = Link('revolute','d', 0, 'a', 0, 'alpha', -pi/2 ,'modified', 'offset', pi/2);
 L(2) = Link('revolute','d', 0, 'a', a1, 'alpha', 0, 'modified');
 bot = SerialLink(L, 'name', 'RRR');
 bot.tool = transl(a2, 0, 0);
+% hold on
+% trplot(trotx(-pi/2)*transl(0, 0, 0)*trotz(pi/2)*transl(0, 0, 0), 'frame', 'Feeder', 'length', 0.5, 'color', 'red', 'text_opts', {'FontSize', 8});
 % bot.teach()
 
-
-T_0_1 = simplify(trotx(pi/2)*transl(0, 0, 0)*trotz(t1 - pi/2)*transl(0, 0, 0));
+T_0_1 = simplify(trotx(-pi/2)*transl(0, 0, 0)*trotz(t1 + pi/2)*transl(0, 0, 0));
 T_1_2 = trotx(0)*transl(a1, 0, 0)*trotz(t2)*transl(0, 0, 0);
 T_2_T = trotx(0)*transl(a2, 0, 0)*trotz(0)*transl(0, 0, 0);
 
@@ -146,7 +147,7 @@ Jw2(1:3, 2) = R_0_2(1:3, 3);
 M1 = simplify(transpose(Jv1)*m_1*Jv1 + transpose(Jw1)*I_0_1*Jw1);
 M2 = simplify(transpose(Jv2)*m_2*Jv2 + transpose(Jw2)*I_0_2*Jw2);
 
-M = M1 + M2;
+M = M1 + M2
 
 
 % Velocity coupling vector
@@ -158,7 +159,7 @@ for j = 1:2
         V2 = V2 + simplify((diff(M(2, j), th(k)) - 0.5*diff(M(j, k), t2)) * thd(j)*thd(k));
     end
 end
-V = simplify([V1;V2;]);
+V = simplify([V1;V2;])
 
 % Gravitational Effects
 G1 = sym(0); G2 = sym(0);
@@ -170,14 +171,14 @@ for j = 1:2
     G2 = G2 - m(j)*[0, 0, g]*Jv{j}(1:3, 2);
 end
 
-G = simplify([G1;G2]);
+G = simplify([G1;G2])
 
 J = sym(zeros([6, 2]));
 J(1:3, 1) = cross(R_0_1(1:3, 3), (P_0_T - P_0_1));
 J(4:6, 1) = R_0_1(1:3, 3);
 J(1:3, 2) = cross(R_0_2(1:3, 3), (P_0_T - P_0_2));
 J(4:6, 2) = R_0_2(1:3, 3);
-J = simplify(J);
+J = simplify(J)
 
 end_effector_force = simplify(R_0_T*f3);
 end_effector_torque = simplify(R_0_T*n3);
