@@ -12,6 +12,23 @@ from launch_ros.actions import Node, PushRosNamespace
 def generate_launch_description():
     package_name='robot_description'
 
+    use_sim_time = LaunchConfiguration('use_sim_time')
+    torque_control = LaunchConfiguration('torque_control')
+    position_control = LaunchConfiguration('position_control')
+
+    use_sim_time_arg = DeclareLaunchArgument(
+            'use_sim_time',
+            default_value='true',
+            description='Use sim time if true')
+    torque_control_arg = DeclareLaunchArgument(
+            'torque_control',
+            default_value='true',
+            description='Use torque control in sim')
+    position_control_arg = DeclareLaunchArgument(
+            'position_control',
+            default_value='true',
+            description='Use position control in sim')
+
     default_world = os.path.join(
         get_package_share_directory('robot_description'),
         'worlds',
@@ -85,15 +102,18 @@ def generate_launch_description():
     robot_desc = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory(package_name),'launch','demo.launch.py'
-            )]), launch_arguments={'use_sim_time': 'true',
-                                    'torque_control': 'false',
-                                    'position_control': 'true'}.items()
+            )]), launch_arguments={'use_sim_time': use_sim_time,
+                                    'torque_control': torque_control,
+                                    'position_control': position_control}.items()
     )
 
 
     ld = LaunchDescription()
 
     # Launch them all!
+    ld.add_action(use_sim_time_arg)
+    ld.add_action(torque_control_arg)
+    ld.add_action(position_control_arg)
     ld.add_action(start_gazebo_ros_bridge_cmd)
     ld.add_action(spawn_entity)
     ld.add_action(robot_desc)
