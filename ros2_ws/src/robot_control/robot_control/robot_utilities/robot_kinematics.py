@@ -1,6 +1,9 @@
 from robot_control.robot_utilities.robot_parser import URDFParser
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import constants
+from typing import *
+from numpy.typing import NDArray
 
 
 class Robot:
@@ -39,7 +42,7 @@ class Robot:
         print(np.round(T, 10))
         return T
     
-    def inverse_kinematics(self, target_position):
+    def inverse_kinematics(self, target_position: NDArray) -> NDArray:
         """
         Calculate the inverse kinematics of the robot.
         :param target_position: Target position of the end effector in homogenous matrix.
@@ -88,8 +91,8 @@ class Robot:
         # X forward, Z up
         # Default position of the leg is pointing down
         # Positive angle points the leg forward
-        a1 = np.abs(self.dh_params[2]['a'])
-        a2 = np.abs(self.dh_params[3]['a'])
+        a1 = self.dh_params[2]['a']
+        a2 = self.dh_params[3]['a']
         q1 = joint_angles[0]
         q2 = joint_angles[1]
 
@@ -114,13 +117,38 @@ class Robot:
         z = np.linspace(start[1], end[1], steps)
         return np.array([x, z]).T
 
-    def dynamics(self, joint_angles):
+    def dynamics(self, joint_angles, joint_velocity):
+
         """
         Calculate the dynamics of the robot.
         :param joint_angles: List of joint angles.
         :return: Mass Matrix, Coriolis Matrix, Gravity Matrix.
         """
+        m1 = self.inertial_properties[1]['mass']
+        m2 = self.inertial_properties[2]['mass']
+        I1 = self.inertial_properties[1]['inertia']
+        I2 = self.inertial_properties[2]['inertia']
+        a1 = self.dh_params[2]['a']
+        a2 = self.dh_params[3]['a']
         
+        # TODO: finalize COM and change coefficients
+        M = np.zeros((2, 2))
+        M[0, 0] = I1[2, 2] + I2[2, 2] + 0.25*(a1**2)*m1 + (a1**2)*m2 + 0.25*(a2**2)*m2 + a1*a2*m2*np.cos(joint_angles[1])
+        M[1, 0] = I2[2, 2] + 0.25*(a2**2)*m2 + 0.5*a1*a2*m2*np.cos(joint_angles[1])
+        M[0, 1] = I2[2, 2] + 0.25*(a2**2)*m2 + 0.5*a1*a2*m2*np.cos(joint_angles[1])
+        M[1, 1] = I2[2, 2] + 0.25*(a2**2)*m2
+
+
+        V = np.zeros((2, 1))
+        V[0] = -0.5*a1*a2*m2*joint_velocity[1]*np.sin(joint_angles[1])*(joint_velocity[1] + 2*joint_velocity[0])
+        V[1] = 0.5*a1*a2*m2*(joint_velocity[0]**2)*np.sin(joint_angles[1])
+
+        G = np.zeros((2, 1))
+        G[0] = -constants.g * m2 * (0.5*a2*np.sin(joint_angles[0] + joint_angles[1]) + 
+                                       a1*np.sin(joint_angles[0])) - 0.5*a1*constants.g*m1*np.sin(joint_angles[0])
+        G[1] = -0.5*a2*constants.g*m2*np.sin(joint_angles[0] + joint_angles[1])
+
+        return M, V, G
 
 def plot_robot_arm(joint_angles, target_position=[0, 0]):
     """
@@ -166,10 +194,10 @@ if __name__ == "__main__":
     robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
     # print(robot.dh_params)
 
-    pose = np.array([0, -0.05])
+    pose = np.array([-0.1, -0.1])
     j = robot.inverse_kinematics(pose)
 
-    # print(np.rad2deg(j))
+    print((j))
     print(robot.jacobian([np.pi/2, 0]))
     
     plot_robot_arm(j[1], pose)
