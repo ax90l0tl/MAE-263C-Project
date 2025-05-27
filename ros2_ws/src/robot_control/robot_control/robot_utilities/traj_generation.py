@@ -46,6 +46,6 @@ if __name__ == "__main__":
     plt.plot(a[0, :], a[2, :], label='qd')
     plt.plot(a[0, :], a[3, :], label='qdd')
     plt.legend()
-    # plt.show()
+    plt.show()
     q2 = [0, 0]
     b = quintic_interp(t, q2, qd, qdd)

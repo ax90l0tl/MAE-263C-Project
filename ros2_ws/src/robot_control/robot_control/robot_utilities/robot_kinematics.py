@@ -39,7 +39,7 @@ class Robot:
             ])
             T = np.dot(T, T_i)
 
-        print(np.round(T, 10))
+        # print(np.round(T, 10))
         return T
     
     def inverse_kinematics(self, target_position: NDArray) -> NDArray:
@@ -104,6 +104,11 @@ class Robot:
         J[4, 0] = 1
         J[4, 1] = 1
         return J
+    
+    def jacobian_square(self, joint_angles):
+        J = self.jacobian(joint_angles)
+        J = J[[0, 2], :]
+        return (J)
     
     def trajectory(self, start, end, steps=10, ):
         """
@@ -194,7 +199,7 @@ if __name__ == "__main__":
     robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
     # print(robot.dh_params)
 
-    pose = np.array([-0.1, -0.1])
+    pose = np.array([0.0, -0.4])
     j = robot.inverse_kinematics(pose)
 
     print((j))

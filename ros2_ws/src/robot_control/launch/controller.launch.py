@@ -33,5 +33,4 @@ def generate_launch_description():
             description='Use sim time if true'),
         
         controller,
-        # joint_robot_state_publisher
     ])

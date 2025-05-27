@@ -22,11 +22,11 @@ def generate_launch_description():
             description='Use sim time if true')
     torque_control_arg = DeclareLaunchArgument(
             'torque_control',
-            default_value='true',
+            default_value='false',
             description='Use torque control in sim')
     position_control_arg = DeclareLaunchArgument(
             'position_control',
-            default_value='true',
+            default_value='false',
             description='Use position control in sim')
 
     default_world = os.path.join(
