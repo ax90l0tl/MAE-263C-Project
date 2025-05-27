@@ -105,6 +105,11 @@ class Robot:
         J[4, 1] = 1
         return J
     
+    def jacobian_square(self, joint_angles):
+        J = self.jacobian(joint_angles)
+        J = J[[0, 2], :]
+        return (J)
+    
     def trajectory(self, start, end, steps=10, ):
         """
         Generate a trajectory from start to end position.
