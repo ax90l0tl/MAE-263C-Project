@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
     <gazebo>
-        <plugin
+        <!-- <plugin
             filename="gz-sim-joint-controller-system"
             name="gz::sim::systems::JointController">
             <joint_name>hip_joint</joint_name>
@@ -33,6 +33,17 @@
             <cmd_max>${max_torque}</cmd_max>
             <cmd_min>${-max_torque}</cmd_min>
             <cmd_offset>0.0</cmd_offset>
+        </plugin> -->
+        <plugin
+            filename="gz-sim-apply-joint-force-system"
+            name="gz::sim::systems::ApplyJointForce">
+            <joint_name>hip_joint</joint_name>
+        </plugin>
+
+        <plugin
+            filename="gz-sim-apply-joint-force-system"
+            name="gz::sim::systems::ApplyJointForce">
+            <joint_name>knee_joint</joint_name>
         </plugin>
     </gazebo>
 
