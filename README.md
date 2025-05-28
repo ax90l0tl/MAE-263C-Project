@@ -69,12 +69,12 @@ sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-r
    ```
 3. In one terminal run:
    ```
-   ros2 launch robot_description sim.launch.py
+   ros2 launch robot_description sim.launch.py torque_control:=true
    ```
    to launch the simulation
 4. In another terminal run:
    ```
-
+   ros2 run robot_control active_compliance_control_node
    ```
 
 ## Helpful Commands
