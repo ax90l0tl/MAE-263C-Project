@@ -80,8 +80,8 @@ class active_compliance_control_node(Node):
             self.x_d = self.default_pose
             x_error = np.atleast_2d(self.x_d - self.x).T
             print("x_error: ", x_error)
-            Kp = np.diag([5000.0, 5000.0])
-            Kd = np.diag([1000.0, 1800.0])
+            Kp = np.diag([100.0, 200.0])
+            Kd = np.diag([10.0, 40.0])
             # COM in urdf is defined at the base of the link TODO need to change
             jacobian =self.robot.jacobian(self.q)
             a1 = self.robot.dh_params[2]['a']

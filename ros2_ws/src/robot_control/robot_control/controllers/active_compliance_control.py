@@ -29,9 +29,9 @@ def active_compliance_control(x_d, x_e, Jacobian, Kp, Kd, q, qd, a1, a2, m1, m2,
     R_d = T_d[0:3, 0:3]
     T = np.vstack((np.hstack((R_d, np.zeros((3, 3)))), np.hstack((np.zeros((3, 3)), R_d))))
 
-    # J_a_d = Jacobian[[0, 2]]
-    J_a_d = T @ Jacobian
-    J_a_d = J_a_d[[0, 2]]
+    J_a_d = Jacobian[[0, 2]]
+    # J_a_d = T @ Jacobian
+    # J_a_d = J_a_d[[0, 2]]
     # print("J_a_d: ", J_a_d)
     # Compute the control output
     control_output = np.zeros((2, 1))
