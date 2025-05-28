@@ -75,10 +75,12 @@ class Robot:
         
         t1 = theta + self.dh_params[1]['offset'] - a
         t1_alt = theta + self.dh_params[1]['offset'] + a
-
-        joint_angles = np.array([[t1, t2],
-                                [t1_alt, t2_alt]])
-        return joint_angles
+        if (t1 < self.joint_properties[1]['lower_limit'] or t1 > self.joint_properties[1]['upper_limit'] 
+        or t2 < self.joint_properties[2]['lower_limit'] or t2 > self.joint_properties[2]['upper_limit']):
+            return np.array([t1_alt, t2_alt])
+        if (t1_alt < self.joint_properties[1]['lower_limit'] or t1_alt > self.joint_properties[1]['upper_limit']
+        or t2_alt < self.joint_properties[2]['lower_limit'] or t2_alt > self.joint_properties[2]['upper_limit']):
+            return np.array([t1, t2])       
     
     def jacobian(self, joint_angles):
         """
@@ -205,8 +207,6 @@ if __name__ == "__main__":
     print((j))
     print(robot.jacobian([np.pi/2, 0]))
     
-    plot_robot_arm(j[1], pose)
-    plot_robot_arm(j[0], pose)
-    robot.forward_kinematics(j[0])
-    robot.forward_kinematics(j[1])
+    plot_robot_arm(j, pose)
+    robot.forward_kinematics(j)
     # print(robot.trajectory([0, 0], [0, -0.01], steps=10))

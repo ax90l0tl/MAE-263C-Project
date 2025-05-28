@@ -6,6 +6,8 @@ from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node, PushRosNamespace
+from launch.actions import RegisterEventHandler
+from launch.event_handlers import OnProcessExit
 
 
 
@@ -107,10 +109,38 @@ def generate_launch_description():
                                     'position_control': position_control}.items()
     )
 
+    
+    sim_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["sim_leg_cont"],
+    )
+
+    joint_broad_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_broad"],
+    )
+
+
+    # Code for delaying a node
+    # 
+    # First add the below lines to imports
+    delayed_sim_controller = RegisterEventHandler(
+        event_handler=OnProcessExit(
+            target_action=spawn_entity,
+            on_exit=[sim_controller],
+        )
+    )
+
+
 
     ld = LaunchDescription()
 
     # Launch them all!
+    # ld.add_action(sim_controller)
+    # ld.add_action(joint_broad_spawner)
+    # ld.add_action(delayed_sim_controller)
     ld.add_action(use_sim_time_arg)
     ld.add_action(torque_control_arg)
     ld.add_action(position_control_arg)

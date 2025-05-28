@@ -34,8 +34,19 @@ def quintic_interp(t, q, qd, qdd, n=200):
     points = np.vstack((t_points, q_points, qd_points, qdd_points))
     return np.array(points)
 
+def linear_parabolic_blend(t, q, qd, qdd, n=200):
+    """
+    Linear parabolic blend interpolation.
+    :param t: Time points.
+    :param q: Desired position at time points.
+    :param qd: Desired velocity at time points.
+    :param qdd: Desired acceleration at time points.
+    :param n: Number of points to interpolate between each segment.
+    :return: Interpolated trajectory as a numpy array.
+    """
+
 if __name__ == "__main__":
-    t = [0, 1]
+    t = [0, 0.2]
     q = [-0.1, -0.5]
     qd = [0, 0]
     qdd = [0, 0]
@@ -45,7 +56,7 @@ if __name__ == "__main__":
     plt.plot(a[0, :], a[1, :], label='q')
     plt.plot(a[0, :], a[2, :], label='qd')
     plt.plot(a[0, :], a[3, :], label='qdd')
+    # for i in range(1, len(t)):
+        
     plt.legend()
     plt.show()
-    q2 = [0, 0]
-    b = quintic_interp(t, q2, qd, qdd)

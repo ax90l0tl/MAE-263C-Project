@@ -1,0 +1,20 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 500
+    use_sim_time: true
+
+    sim_leg_cont:
+      type: effort_controllers/JointGroupEffortController
+
+    joint_broad:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+sim_leg_cont:
+  ros__parameters:
+    joints:
+      - hip_joint
+      - knee_joint
+
+joint_broad:
+  ros__parameters:
+    joints: "{hip_joint, knee_joint}"

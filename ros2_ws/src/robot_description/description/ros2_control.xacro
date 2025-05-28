@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <ros2_control name="robot_control" type="system">
+        <hardware>
+            <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </hardware>
+        <joint name="hip_joint">
+            <command_interface name="effort">
+                <param name="min">${-max_torque}</param>
+                <param name="max">${max_torque}</param>
+            </command_interface>
+            <state_interface name="position"></state_interface>
+            <state_interface name="velocity"></state_interface>
+        </joint>
+        <joint name="knee_joint">
+            <command_interface name="effort">
+                <param name="min">${-max_torque}</param>
+                <param name="max">${max_torque}</param>
+            </command_interface>
+            <state_interface name="position"></state_interface>
+            <state_interface name="velocity"></state_interface>
+        </joint>
+
+    </ros2_control>
+
+    <gazebo>
+        <plugin
+            filename="libgz_ros2_control-system.so"
+            name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+            <parameters>$(find robot_description)/config/ros2_control.yaml</parameters>
+        </plugin>
+    </gazebo>
+</robot>

@@ -135,8 +135,9 @@
         <xacro:if value="$(arg torque_control)">
             <xacro:include filename="$(find robot_description)/description/torque_control.xacro" />
         </xacro:if>
-        <xacro:if value="$(arg position_control)">
-            <xacro:include filename="$(find robot_description)/description/position_control.xacro" />
-        </xacro:if>
+        <!-- <xacro:if value="$(arg position_control)"> -->
+            <!-- <xacro:include filename="$(find robot_description)/description/position_control.xacro" /> -->
+        <!-- </xacro:if> -->
+        <!-- <xacro:include filename="$(find robot_description)/description/ros2_control.xacro" /> -->
     </xacro:if>
 </robot>
