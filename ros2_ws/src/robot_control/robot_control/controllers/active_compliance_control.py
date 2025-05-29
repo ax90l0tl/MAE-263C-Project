@@ -40,14 +40,14 @@ def active_compliance_control(x_d, x_e, Jacobian, Kp, Kd, q, qd, a1, a2, m1, m2,
     return control_output
 
 if __name__ == "__main__":
-    robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
+    robot = Robot(package_name='robot_desc', urdf_file='robot.urdf.xacro')
     q = np.array([-1.5707963267962646,  3.0415926535912727])
     x = np.array([0.0, -0.55])
     x_d = np.array([0.0, -0.4])
     Kp = np.diag([5000.0, 100.0])
     Kd = np.diag([500.0, 10.0])
     qd = np.array([-0.001, 0.1])
-    q_d = robot.inverse_kinematics(x_d)[0]
+    q_d = robot.inverse_kinematics(x_d)
     T_d = robot.forward_kinematics(q_d)
     jacobian =robot.jacobian(q)
     a1 = robot.dh_params[2]['a']

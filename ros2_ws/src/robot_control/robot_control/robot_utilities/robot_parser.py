@@ -9,7 +9,7 @@ from ament_index_python.packages import get_package_share_directory
 # doesn't require ROS2 but you will need to have a ros2 workspace setup to find packages and stuff
 
 class URDFParser():
-    def __init__(self, package_name='robot_description', urdf_file='robot.urdf'):
+    def __init__(self, package_name='robot_desc', urdf_file='robot.urdf'):
 
         # Get path to the URDF file
         self.package_path = get_package_share_directory(package_name)
@@ -109,7 +109,7 @@ class URDFParser():
         return dh_params
 
 if __name__ == "__main__":
-    URDFParserNode = URDFParser(package_name='robot_description', urdf_file='robot.urdf.xacro')
+    URDFParserNode = URDFParser(package_name='robot_desc', urdf_file='robot.urdf.xacro')
     print(URDFParserNode.get_DH_params())
     print(URDFParserNode.get_inertial_prop())
     print(URDFParserNode.get_joint_properties())

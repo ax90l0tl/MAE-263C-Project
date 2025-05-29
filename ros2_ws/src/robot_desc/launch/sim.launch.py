@@ -12,7 +12,7 @@ from launch.event_handlers import OnProcessExit
 
 
 def generate_launch_description():
-    package_name='robot_description'
+    package_name='robot_desc'
 
     use_sim_time = LaunchConfiguration('use_sim_time')
     torque_control = LaunchConfiguration('torque_control')
@@ -32,7 +32,7 @@ def generate_launch_description():
             description='Use position control in sim')
 
     default_world = os.path.join(
-        get_package_share_directory('robot_description'),
+        get_package_share_directory('robot_desc'),
         'worlds',
         'world.world'
     )
@@ -54,7 +54,7 @@ def generate_launch_description():
 
     set_env_vars_resources = AppendEnvironmentVariable(
             'GZ_SIM_RESOURCE_PATH',
-            os.path.join(get_package_share_directory('robot_description'),'meshes')
+            os.path.join(get_package_share_directory('robot_desc'),'meshes')
             )
     
     # Include the Gazebo launch file, provided by the gazebo_ros package
@@ -74,7 +74,7 @@ def generate_launch_description():
     )
 
     bridge_params = os.path.join(
-        get_package_share_directory('robot_description'),
+        get_package_share_directory('robot_desc'),
         'config',
         'ros_gz_bridge.yaml'
         )

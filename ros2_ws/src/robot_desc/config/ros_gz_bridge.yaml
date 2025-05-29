@@ -5,11 +5,11 @@
   direction: GZ_TO_ROS
 
 # gz topic published by JointState plugin
-- ros_topic_name: "/joint_states"
-  gz_topic_name: "model/robot/joint_states"
-  ros_type_name: "sensor_msgs/msg/JointState"
-  gz_type_name: "gz.msgs.Model"
-  direction: GZ_TO_ROS
+# - ros_topic_name: "/joint_states"
+#   gz_topic_name: "model/robot/joint_states"
+#   ros_type_name: "sensor_msgs/msg/JointState"
+#   gz_type_name: "gz.msgs.Model"
+#   direction: GZ_TO_ROS
 
 # - ros_topic_name: "/hip_joint/cmd_torque"
 #   # gz_topic_name: "model/robot/joint/hip_joint/0/cmd_torque"

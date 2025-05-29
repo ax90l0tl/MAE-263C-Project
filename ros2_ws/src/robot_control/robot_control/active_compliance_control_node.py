@@ -9,6 +9,8 @@ from robot_interfaces.srv import Jump
 from sensor_msgs.msg import JointState
 from scipy import constants
 
+from std_msgs.msg import Float64MultiArray
+
 from robot_control.controllers.active_compliance_control import active_compliance_control
 
 states = {
@@ -26,7 +28,7 @@ state_names = {v: k for k, v in states.items()}
 class active_compliance_control_node(Node):
     def __init__(self):
         super().__init__('active_compliance_control_node')
-        self.robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
+        self.robot = Robot(package_name='robot_desc', urdf_file='robot.urdf.xacro')
         qos_profile = QoSProfile(reliability=QoSReliabilityPolicy.BEST_EFFORT,
                                  history=QoSHistoryPolicy.KEEP_LAST,
                                  depth=1,
@@ -38,6 +40,7 @@ class active_compliance_control_node(Node):
         
         self.hip_pub = self.create_publisher(Float64, '/hip_joint/cmd_torque', 10)
         self.knee_pub = self.create_publisher(Float64, '/knee_joint/cmd_torque', 10)
+        self.control_pub = self.create_publisher(Float64MultiArray, '/sim_leg_cont/commands', 10)
 
         timer_period = 0.005  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
@@ -52,7 +55,7 @@ class active_compliance_control_node(Node):
         self.qd = np.zeros(2)
         self.x = np.zeros(2)
         self.u = np.zeros(2)
-        self.q_d = self.robot.inverse_kinematics(self.x_d)[0]
+        self.q_d = self.robot.inverse_kinematics(self.x_d)
         self.T_d = self.robot.forward_kinematics(self.q_d)
 
         self.start_time = self.get_clock().now().nanoseconds
@@ -102,6 +105,9 @@ class active_compliance_control_node(Node):
             # print("State: ", state_names[self.state])
         hip_msg = Float64()
         knee_msg = Float64()
+        control_msg = Float64MultiArray()
+        control_msg.data = self.u.flatten().tolist()
+        self.control_pub.publish(control_msg)
         hip_msg.data = float(self.u[0])
         knee_msg.data = float(self.u[1])
         self.hip_pub.publish(hip_msg)

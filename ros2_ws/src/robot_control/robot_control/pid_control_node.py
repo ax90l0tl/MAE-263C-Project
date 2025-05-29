@@ -22,7 +22,7 @@ state_names = {v: k for k, v in states.items()}
 class robot_control_node(Node):
     def __init__(self):
         super().__init__('robot_control_node')
-        self.robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
+        self.robot = Robot(package_name='robot_desc', urdf_file='robot.urdf.xacro')
         qos_profile = QoSProfile(reliability=QoSReliabilityPolicy.BEST_EFFORT,
                                  history=QoSHistoryPolicy.KEEP_LAST,
                                  depth=1,

@@ -15,7 +15,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
 
     # Process the URDF file
-    pkg_path = os.path.join(get_package_share_directory('robot_description'))
+    pkg_path = os.path.join(get_package_share_directory('robot_desc'))
     
     # Need joint state publisher for continuous and revolute joints
     controller = Node(

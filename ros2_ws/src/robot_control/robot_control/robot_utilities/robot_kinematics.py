@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 
 
 class Robot:
-    def __init__(self, package_name='robot_description', urdf_file='robot.urdf'):
+    def __init__(self, package_name='robot_desc', urdf_file='robot.urdf'):
         self.urdf_parser = URDFParser(package_name, urdf_file)
         self.inertial_properties = self.urdf_parser.get_inertial_prop()
         self.joint_properties = self.urdf_parser.get_joint_properties()
@@ -198,7 +198,7 @@ def plot_robot_arm(joint_angles, target_position=[0, 0]):
     plt.show()
 
 if __name__ == "__main__":
-    robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
+    robot = Robot(package_name='robot_desc', urdf_file='robot.urdf.xacro')
     # print(robot.dh_params)
 
     pose = np.array([0.0, -0.4])
