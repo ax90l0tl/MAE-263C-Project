@@ -39,7 +39,7 @@ class Robot:
             ])
             T = np.dot(T, T_i)
 
-        print(np.round(T, 10))
+        # print(np.round(T, 10))
         return T
     
     def inverse_kinematics(self, target_position: NDArray) -> NDArray:
@@ -149,6 +149,36 @@ class Robot:
         G[1] = -0.5*a2*constants.g*m2*np.sin(joint_angles[0] + joint_angles[1])
 
         return M, V, G
+    
+    def draw_workspace(self, density=200, plot=False):
+        # print(self.joint_properties[1]['lower_limit'], self.joint_properties[1]['upper_limit'])
+        # print(self.joint_properties[2]['lower_limit'], self.joint_properties[2]['upper_limit'])
+        
+        j1_range = np.linspace(self.joint_properties[1]['lower_limit'], self.joint_properties[1]['upper_limit'], density)
+        j2_range = np.linspace(self.joint_properties[2]['lower_limit'], self.joint_properties[2]['upper_limit'], density)
+        x_coords = []
+        z_coords = []
+        for i in range(density):
+            for j in range(density):
+                j1 = j1_range[i]
+                j2 = j2_range[j]
+                T = self.forward_kinematics([j1, j2])
+                x = T[0, -1]
+                z = T[2, -1]
+                x_coords.append(x)
+                z_coords.append(z)
+        
+        if plot:
+            plt.figure()
+            plt.scatter(x_coords, z_coords, s=0.5, color='blue')
+            plt.title("Robot Workspace")
+            plt.xlabel("X-axis")
+            plt.ylabel("Z-axis")
+            plt.xlim(-0.55, 0.55)
+            plt.ylim(-0.55, 0.55)
+            plt.grid()
+            plt.show()
+        
 
 def plot_robot_arm(joint_angles, target_position=[0, 0]):
     """
@@ -194,14 +224,18 @@ if __name__ == "__main__":
     robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
     # print(robot.dh_params)
 
-    pose = np.array([-0.1, -0.1])
-    j = robot.inverse_kinematics(pose)
+    # pose = np.array([-0.1, -0.1])
+    # j = robot.inverse_kinematics(pose)
 
-    print((j))
-    print(robot.jacobian([np.pi/2, 0]))
+    # print((j))
+    # print(robot.jacobian([np.pi/2, 0]))
     
-    plot_robot_arm(j[1], pose)
-    plot_robot_arm(j[0], pose)
-    robot.forward_kinematics(j[0])
-    robot.forward_kinematics(j[1])
+    # plot_robot_arm(j[1], pose)
+    # plot_robot_arm(j[0], pose)
+    # robot.forward_kinematics(j[0])
+    # robot.forward_kinematics(j[1])
+    # robot.draw_workspace(plot=True, density=200)
+    T = robot.forward_kinematics([-2.80, 2.62])
+    print(T)
+    print(robot.inverse_kinematics([T[0, 3], T[2, 3]]))
     # print(robot.trajectory([0, 0], [0, -0.01], steps=10))
