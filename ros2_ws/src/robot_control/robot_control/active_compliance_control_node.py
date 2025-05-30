@@ -66,7 +66,6 @@ class active_compliance_control_node(Node):
             Kd=np.diag([1.0, 1.0])
             Ki=np.diag([0.001, 0.001])
             self.u, self.error = pid_control(self.q, np.array([-1.36, 2.62]), self.qd, Kp, Kd, Ki, error_prev=self.error, dt=0.005)
-             
         else:
             # if self.on_ground:
             #     if self.jump:
@@ -100,11 +99,11 @@ class active_compliance_control_node(Node):
             print("u", self.u)
 
             # else:
-            #     if (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9) > 0.01 and self.state == states['JUMP']:
-            #         self.state = states['IN_AIR']
-            #         x = self.robot.inverse_kinematics(np.array([-0.1, -0.1]))
-            #         self.x_d = x[0]
-            #         self.on_ground = False
+                # if (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9) > 0.01 and self.state == states['JUMP']:
+                    # self.state = states['IN_AIR']
+                    # x = self.robot.inverse_kinematics(np.array([-0.1, -0.1]))
+                    # self.x_d = x[0]
+                    # self.on_ground = False
 
             # print("State: ", state_names[self.state])
         hip_msg = Float64()

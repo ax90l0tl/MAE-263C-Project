@@ -4,6 +4,7 @@ from scipy import constants
 import matplotlib.pyplot as plt
 
 def active_compliance_control(x_d, x_e, Jacobian, Kp, Kd, q, qd, a1, a2, m0, m1, m2, q_d, T_d):
+
     """
     Compute the control output for active compliance control.
     
