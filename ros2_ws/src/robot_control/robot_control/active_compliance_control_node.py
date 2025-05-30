@@ -10,6 +10,7 @@ from sensor_msgs.msg import JointState
 from scipy import constants
 
 from robot_control.controllers.active_compliance_control import active_compliance_control
+from robot_control.controllers.pid_control import pid_control
 
 states = {
     'IDLE': 0,
@@ -46,21 +47,26 @@ class active_compliance_control_node(Node):
         self.jump = False
         self.state = states['IDLE']
         
-        self.default_pose = np.array([0.0, -0.4])
+        self.default_pose = np.array([0.0, -0.3])
         self.x_d = self.default_pose
-        self.q = np.array([0.0, -0.4])
+        self.q = np.zeros(2)
         self.qd = np.zeros(2)
         self.x = np.zeros(2)
         self.u = np.zeros(2)
         self.q_d = self.robot.inverse_kinematics(self.x_d)[0]
         self.T_d = self.robot.forward_kinematics(self.q_d)
+        self.error = np.zeros(2)
 
         self.start_time = self.get_clock().now().nanoseconds
         self.last_sim_time = self.get_clock().now().nanoseconds
 
     def timer_callback(self):
         if (self.get_clock().now().nanoseconds - self.start_time)/(1e9) < 2.0 or (self.get_clock().now().nanoseconds - self.last_sim_time)/(1e9) > 2.0:
-            self.u = np.array([-100000, 100000.0])
+            Kp=np.diag([100.0, 100.0])
+            Kd=np.diag([1.0, 1.0])
+            Ki=np.diag([0.001, 0.001])
+            self.u, self.error = pid_control(self.q, np.array([-1.36, 2.62]), self.qd, Kp, Kd, Ki, error_prev=self.error, dt=0.005)
+             
         else:
             # if self.on_ground:
             #     if self.jump:
@@ -80,24 +86,25 @@ class active_compliance_control_node(Node):
             self.x_d = self.default_pose
             x_error = np.atleast_2d(self.x_d - self.x).T
             print("x_error: ", x_error)
-            Kp = np.diag([100.0, 200.0])
-            Kd = np.diag([10.0, 40.0])
+            Kp = np.diag([40.0, 200.0])
+            Kd = np.diag([1.0, 40.0])
             # COM in urdf is defined at the base of the link TODO need to change
             jacobian =self.robot.jacobian(self.q)
             a1 = self.robot.dh_params[2]['a']
             a2 = self.robot.dh_params[3]['a']
             m1 = self.robot.inertial_properties[1]['mass']
             m2 = self.robot.inertial_properties[2]['mass']
-            self.u = np.squeeze(active_compliance_control(self.x_d, self.x, jacobian, Kp, Kd, self.q, self.qd, a1, a2, m1, m2, self.q_d, self.T_d)).T
+            m0 = self.robot.inertial_properties[0]['mass']
+            self.u = np.squeeze(active_compliance_control(self.x_d, self.x, jacobian, Kp, Kd, self.q, self.qd, a1, a2, m0, m1, m2, self.q_d, self.T_d)).T
             # hip torque should be positive, knee torque should be negative
             print("u", self.u)
 
             # else:
-                # if (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9) > 0.01 and self.state == states['JUMP']:
-                    # self.state = states['IN_AIR']
-                    # x = self.robot.inverse_kinematics(np.array([-0.1, -0.1]))
-                    # self.x_d = x[0]
-                    # self.on_ground = False
+            #     if (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9) > 0.01 and self.state == states['JUMP']:
+            #         self.state = states['IN_AIR']
+            #         x = self.robot.inverse_kinematics(np.array([-0.1, -0.1]))
+            #         self.x_d = x[0]
+            #         self.on_ground = False
 
             # print("State: ", state_names[self.state])
         hip_msg = Float64()
@@ -115,10 +122,10 @@ class active_compliance_control_node(Node):
 
     def joint_callback(self, msg):
         self.last_sim_time = self.get_clock().now().nanoseconds
-        self.q = np.array(msg.position)
+        self.q = np.array(msg.position)[1:]
         fk = self.robot.forward_kinematics(self.q)
         self.x = np.array([fk[0, -1], fk[2, -1]])
-        self.qd = np.array(msg.velocity)
+        self.qd = np.array(msg.velocity)[1:]
 
     def jump_callback(self, request, response):
         print("Jump request received")

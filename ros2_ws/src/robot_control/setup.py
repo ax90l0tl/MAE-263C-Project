@@ -23,7 +23,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'pid_control_node = robot_control.robot_control_node:main',
+            'pid_control_node = robot_control.pid_control_node:main',
             'active_compliance_control_node = robot_control.active_compliance_control_node:main',
         ],
     },

@@ -185,45 +185,44 @@ class Robot:
             plt.show()
         
 
-def plot_robot_arm(joint_angles, target_position=[0, 0]):
-    """
-    Plot the robot arm given joint angles.
-    :param joint_angles: List of joint angles.
-    """
-    x_coords = [0]
-    z_coords = [0]
-    T = np.eye(4)
+    def plot_robot_arm(self, joint_angles, target_position=[0, 0], fig=None, ax=None, label=""):
+        """
+        Plot the robot arm given joint angles.
+        :param joint_angles: List of joint angles.
+        """
+        x_coords = [0]
+        z_coords = [0]
+        T = np.eye(4)
 
-    for i, joint in enumerate(robot.dh_params):
-        if joint['type'] == 'fixed':
-            theta = joint['theta']
-        elif joint['type'] == 'revolute':
-            theta = joint_angles[i - 1] - joint['offset']
-        elif joint['type'] == 'prismatic':
-            continue
-        alpha = joint['alpha']
-        a = joint['a']
-        d = joint['d']
-        T_i = np.array([
-            [np.cos(theta), -np.sin(theta), 0, a],
-            [np.sin(theta)*np.cos(alpha), np.cos(theta)*np.cos(alpha), -np.sin(alpha), -d*np.sin(alpha)],
-            [np.sin(theta)*np.sin(alpha), np.cos(theta)*np.sin(alpha), np.cos(alpha), d*np.cos(alpha)],
-            [0, 0, 0, 1]
-        ])
-        T = np.dot(T, T_i)
-        x_coords.append(T[0, 3])
-        z_coords.append(T[2, 3])
+        for i, joint in enumerate(self.dh_params):
+            if joint['type'] == 'fixed':
+                theta = joint['theta']
+            elif joint['type'] == 'revolute':
+                theta = joint_angles[i - 1] - joint['offset']
+            elif joint['type'] == 'prismatic':
+                continue
+            alpha = joint['alpha']
+            a = joint['a']
+            d = joint['d']
+            T_i = np.array([
+                [np.cos(theta), -np.sin(theta), 0, a],
+                [np.sin(theta)*np.cos(alpha), np.cos(theta)*np.cos(alpha), -np.sin(alpha), -d*np.sin(alpha)],
+                [np.sin(theta)*np.sin(alpha), np.cos(theta)*np.sin(alpha), np.cos(alpha), d*np.cos(alpha)],
+                [0, 0, 0, 1]
+            ])
+            T = np.dot(T, T_i)
+            x_coords.append(T[0, 3])
+            z_coords.append(T[2, 3])
 
-    plt.figure()
-    plt.plot(x_coords, z_coords, marker='o', linestyle='-', color='b')
-    plt.scatter(target_position[0], target_position[1], color='r')
-    plt.title("Robot Arm Configuration")
-    plt.xlabel("X-axis")
-    plt.ylabel("Z-axis")
-    plt.xlim(-0.55, 0.55)
-    plt.ylim(-0.55, 0.55)
-    plt.grid()
-    plt.show()
+        # plt.figure()
+        fig.plot(x_coords, z_coords, marker='o', linestyle='-', color='b', label=label)
+        fig.scatter(target_position[0], target_position[1], color='r')
+        fig.set_xlabel("X-axis")
+        fig.set_ylabel("Z-axis")
+        fig.set_xlim(-0.55, 0.55)
+        fig.set_ylim(-0.55, 0.55)
+        # plt.grid()
+        # plt.show()
 
 if __name__ == "__main__":
     robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
@@ -235,11 +234,11 @@ if __name__ == "__main__":
     # print((j))
     # print(robot.jacobian([np.pi/2, 0]))
     
-    # plot_robot_arm(j[1], pose)
-    # plot_robot_arm(j[0], pose)
+    # robot.plot_robot_arm(j[1], pose)
+    # robot.plot_robot_arm(j[0], pose)
     # robot.forward_kinematics(j[0])
     # robot.forward_kinematics(j[1])
-    # robot.draw_workspace(plot=True, density=200)
+    robot.draw_workspace(plot=True, density=200)
     T = robot.forward_kinematics([-2.80, 2.62])
     print(T)
     print(robot.inverse_kinematics([T[0, 3], T[2, 3]]))

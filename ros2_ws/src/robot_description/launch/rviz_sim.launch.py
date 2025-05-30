@@ -107,18 +107,34 @@ def generate_launch_description():
                                     'position_control': position_control}.items()
     )
 
+
+    # Path to the RViz configuration file
+    rviz_config_file = os.path.join(get_package_share_directory('robot_description'), 'rviz', 'rviz.rviz')
+
+    # Add RViz node
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config_file]  # Specify the RViz config file
+    )
+
+
     ld = LaunchDescription()
 
     # Launch them all!
+    ld.add_action(set_env_vars_resources)
+    ld.add_action(world_arg)
     ld.add_action(use_sim_time_arg)
     ld.add_action(torque_control_arg)
     ld.add_action(position_control_arg)
+    ld.add_action(gzserver_cmd)
     ld.add_action(start_gazebo_ros_bridge_cmd)
     ld.add_action(spawn_entity)
     ld.add_action(robot_desc)
     ld.add_action(namespace_arg)
-    ld.add_action(set_env_vars_resources)
-    ld.add_action(world_arg)
-    ld.add_action(gzserver_cmd)
-    ld.add_action(gzclient_cmd)
+    ld.add_action(rviz_node)
+
+    # ld.add_action(gzclient_cmd)
     return ld

@@ -4,13 +4,19 @@
     <xacro:arg name="torque_control" default="false" />
     <xacro:arg name="position_control" default="false" />
     <xacro:property name="L1_length" default="0.145" />
-    <!-- <xacro:property name="L1_length" default="0.093732"/> -->
     <xacro:property name="L2_length" default="0.215" />
-    <!-- <xacro:property name="L2_length" default="0.125"/> -->
     <xacro:property name="max_torque" default="20.1" />
     <link name="world">
     </link>
 
+    <!-- 
+    ** IMPORTANT **
+    Moment of inertia cross terms are zero for stability
+    Moment of inertia of base_link not real because it doesn't rotate (helps sim stability)
+    Moment of inertia xx and yy terms for hip, knee, and foot are set to 0.1 for stability
+    Moment of inertia zz terms for hip, knee, and foot are multiplied by 10 for stability (if pulling
+    values from URDF, divide by 10 to get real value) 
+    -->
     <joint name="slider_joint" type="prismatic">
         <parent link="world" />
         <child link="base_link" />
@@ -23,17 +29,20 @@
     <link name="base_link">
         <visual>
             <geometry>
-                <!-- <mesh filename="file://$(find robot_description)/meshes/base_link.stl"/> -->
+                <mesh filename="file://$(find robot_description)/meshes/base_link.STL" />
                 <!-- for preview -->
-                <mesh filename="../meshes/base_link.STL" />
+                <!-- <mesh filename="../meshes/base_link.STL" /> -->
                 <!-- <box size="${L1_length} 0.05 0.02" /> -->
             </geometry>
+            <material name="red">
+                <color rgba="1 0 0 1" />
+            </material>
         </visual>
         <inertial>
-            <origin xyz="0.000113 0.003536 0.005902" rpy="0 0 0" />
+            <origin xyz="0.0 0 0" rpy="0 0 0" />
             <mass value="0.39" />
-            <inertia ixx="0.000359" ixy="0.000001" ixz="-0.000001"
-                iyy="0.000160" iyz="0.000076" izz="0.000302" />
+            <inertia ixx="0.1" ixy="0.0" ixz="0.0"
+                iyy="0.1" iyz="0.0" izz="0.1" />
         </inertial>
     </link>
 
@@ -43,33 +52,34 @@
         <origin xyz="0 0 0" rpy="${pi/2} ${pi/2} 0" />
         <axis xyz="0 0 1" />
         <limit effort="${max_torque}" lower="-2.8" upper="0.46" velocity="31.67" />
-        <dynamics damping="0.01" friction="0.01" />
+        <dynamics damping="0.1" friction="0.1" />
     </joint>
 
     <link name="hip_link">
         <visual>
             <!-- <origin xyz="${L1_length/2} 0 0" rpy="0 0 0" /> -->
             <geometry>
-                <!-- <mesh filename="file://$(find robot_description)/meshes/hip.stl"/> -->
+                <mesh filename="file://$(find robot_description)/meshes/hip.STL" />
                 <!-- for preview -->
-                <mesh filename="../meshes/hip.STL" />
+                <!-- <mesh filename="../meshes/hip.STL" /> -->
                 <!-- <box size="${L1_length} 0.05 0.02" /> -->
             </geometry>
             <material name="blue">
                 <color rgba="0 0 1 1" />
             </material>
         </visual>
-        <!-- <collision>
-            <origin xyz="${L1_length/2} 0 0" rpy="0 0 0" /> -->
-        <!-- <geometry>
-                <box size="${L1_length} 0.05 0.02" /> -->
-        <!-- </geometry> -->
-        <!-- </collision> -->
+        <collision>
+            <geometry>
+                <mesh filename="file://$(find robot_description)/meshes/hip_collision.STL" />
+                <!-- for preview -->
+                <!-- <mesh filename="../meshes/hip_collision.STL" /> -->
+            </geometry>
+        </collision>
         <inertial>
             <origin xyz="0.016172 0.057426 0.010825" rpy="0 0 0" />
             <mass value="0.5" />
-            <inertia ixx="0.000596" ixy=" 0.000338" ixz="-0.000138"
-                iyy="0.000959" iyz="0.000145" izz="0.001275" />
+            <inertia ixx="0.01" ixy=" 0.0" ixz="0.0"
+                iyy="0.01" iyz="0.0" izz="0.01275" />
         </inertial>
     </link>
 
@@ -79,33 +89,34 @@
         <origin xyz="${L1_length} 0 0.0277" rpy="0 0 0" />
         <axis xyz="0 0 1" />
         <limit effort="${max_torque}" lower="-2.34" upper="2.62" velocity="31.67" />
-        <dynamics damping="0.01" friction="0.01" />
+        <dynamics damping="0.1" friction="0.1" />
     </joint>
 
     <link name="knee_link">
         <visual>
             <!-- <origin xyz="${L2_length/2} 0 0" rpy="0 0 0" /> -->
             <geometry>
-                <!-- <mesh filename="file://$(find robot_description)/meshes/knee.STL"/> -->
+                <mesh filename="file://$(find robot_description)/meshes/knee.STL" />
                 <!-- for preview -->
-                <mesh filename="../meshes/knee.STL" />
+                <!-- <mesh filename="../meshes/knee.STL" /> -->
                 <!-- <box size="${L2_length} 0.05 0.02" /> -->
             </geometry>
             <material name="green">
                 <color rgba="0 1 0 1" />
             </material>
         </visual>
-        <!-- <collision> -->
-        <!-- <origin xyz="${L2_length/2} 0 0" rpy="0 0 0" /> -->
-        <!-- <geometry> -->
-        <!-- <box size="${L2_length} 0.01 0.04" /> -->
-        <!-- </geometry> -->
-        <!-- </collision> -->
+        <collision>
+            <geometry>
+                <mesh filename="file://$(find robot_description)/meshes/knee_collision.STL" />
+                <!-- for preview -->
+                <!-- <mesh filename="../meshes/knee_collision.STL" /> -->
+            </geometry>
+        </collision>
         <inertial>
             <origin xyz="0.119035 -0.021572 0.000043" rpy="0 0 0" />
             <mass value="0.055566" />
-            <inertia ixx="0.000022" ixy="-0.000033" ixz="0.000000"
-                iyy="0.000387" iyz="0.000000" izz="0.000407" />
+            <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+                iyy="0.01" iyz="0.0" izz="0.00407" />
         </inertial>
     </link>
 
@@ -124,28 +135,30 @@
     <link name="foot_link">
         <visual>
             <geometry>
-                <!-- <mesh filename="file://$(find robot_description)/meshes/foot.stl"/> -->
+                <mesh filename="file://$(find robot_description)/meshes/foot.STL" />
                 <!-- for preview -->
-                <mesh filename="../meshes/foot.STL" />
+                <!-- <mesh filename="../meshes/foot.STL" /> -->
                 <!-- <sphere radius="0.05" /> -->
             </geometry>
+            <material name="red">
+                <color rgba="1 0 0 1" />
+            </material>
         </visual>
         <!-- Something is wrong with the urdf/xacro/sdf conversion.
          This collision name changes when the sim is launched. -->
         <!-- <collision name="foot_collision"> -->
         <collision>
             <geometry>
-                <cylinder radius="0.02414" length="0.01" />
+                <sphere radius="0.02414" />
             </geometry>
         </collision>
         <inertial>
             <origin xyz="0.000290 -0.000906 -0.000052" rpy="0 0 0" />
             <mass value="0.013619" />
-            <inertia ixx="0.000002" ixy="0.000000" ixz="0.000000"
-                iyy="0.000003" iyz="0.000000" izz="0.000004" />
+            <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+                iyy="0.01" iyz="0.0" izz="0.000004" />
         </inertial>
     </link>
-
 
 
     <xacro:if value="$(arg use_sim_time)">
