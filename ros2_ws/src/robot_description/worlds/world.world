@@ -30,6 +30,11 @@
       name="gz::sim::systems::Contact">
     </plugin>
 
+    <plugin
+      filename="gz-sim-forcetorque-system"
+      name="gz::sim::systems::ForceTorque">
+    </plugin>
+
     <model name="ground_plane">
       <static>true</static>
       <link name="ground">

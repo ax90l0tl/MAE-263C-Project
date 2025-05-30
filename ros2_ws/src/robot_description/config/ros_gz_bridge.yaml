@@ -17,6 +17,7 @@
   ros_type_name: "std_msgs/msg/Float64"
   gz_type_name: "gz.msgs.Double"
   direction: ROS_TO_GZ
+  lazy: true 
 
 - ros_topic_name: "/knee_joint/cmd_torque"
   # gz_topic_name: "model/robot/joint/knee_joint/0/cmd_torque"
@@ -24,18 +25,33 @@
   ros_type_name: "std_msgs/msg/Float64"
   gz_type_name: "gz.msgs.Double"
   direction: ROS_TO_GZ
-  
+  lazy: true 
+
 - ros_topic_name: "/hip_joint/cmd_pos"
   gz_topic_name: "model/robot/joint/hip_joint/0/cmd_pos"
   ros_type_name: "std_msgs/msg/Float64"
   gz_type_name: "gz.msgs.Double"
   direction: ROS_TO_GZ
+  lazy: true 
 
 - ros_topic_name: "/knee_joint/cmd_pos"
   gz_topic_name: "model/robot/joint/knee_joint/0/cmd_pos"
   ros_type_name: "std_msgs/msg/Float64"
   gz_type_name: "gz.msgs.Double"
   direction: ROS_TO_GZ
+  lazy: true 
+
+- ros_topic_name: "hip_FT"
+  gz_topic_name: "model/robot/sensors/hip_FT"
+  ros_type_name: "geometry_msgs/msg/WrenchStamped"
+  gz_type_name: "gz.msgs.Wrench"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "knee_FT"
+  gz_topic_name: "model/robot/sensors/knee_FT"
+  ros_type_name: "geometry_msgs/msg/WrenchStamped"
+  gz_type_name: "gz.msgs.Wrench"
+  direction: GZ_TO_ROS
 
 - ros_topic_name: "/contact"
   gz_topic_name: "/model/robot/sensors/contact"

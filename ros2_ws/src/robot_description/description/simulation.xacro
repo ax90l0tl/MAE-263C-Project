@@ -106,6 +106,30 @@
     </plugin>
   </gazebo>
 
+  <gazebo reference="hip_joint">
+    <sensor name="hip_FT" type="force_torque">
+      <always_on>true</always_on>
+      <update_rate>500.0</update_rate>
+      <topic>/model/robot/sensors/hip_FT</topic>
+      <force_torque>
+        <frame>child</frame>
+        <measure_direction>parent_to_child</measure_direction>
+      </force_torque>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="knee_joint">
+    <sensor name="knee_FT" type="force_torque">
+      <always_on>true</always_on>
+      <update_rate>500.0</update_rate>
+      <topic>/model/robot/sensors/knee_FT</topic>
+      <force_torque>
+        <frame>child</frame>
+        <measure_direction>parent_to_child</measure_direction>
+      </force_torque>
+    </sensor>
+  </gazebo>
+
 
   <gazebo reference="foot_link">
     <sensor name='foot_contact' type='contact'>
