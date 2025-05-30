@@ -26,40 +26,45 @@ def active_compliance_control(x_d, x_e, Jacobian, Kp, Kd, q, qd, a1, a2, m0, m1,
     print("x_error: ", x_error)
     qd = np.atleast_2d(qd.copy()).T
     # COM in urdf is defined at the base of the link TODO need to change
-    g = np.ones((2, 1)) # * ((0.0574*np.sin(q[0]) - 0.0162*np.cos(q[0])) * m1 + m0)* constants.g
-    g[0] += (0.0216*np.cos(q[0] + q[1]) - 0.1190*np.sin(q[0] + q[1]) - a1*np.sin(q[0]))*constants.g*m2 + (- 0.0574*np.cos(q[0]) - 0.0162*np.sin(q[0]))*constants.g*m1
-    g[1] += constants.g*m2*(0.0216*np.cos(q[1] + q[0]) - 0.1190*np.sin(q[1] + q[0]))
+    # Treat base link mass as point mass
+    # Treat gravity as normal force
+    # g = Jacobian.T @ np.array([[0], [0], [m0 * constants.g], [0], [0], [0]])
+    # print(g)
+    g = np.zeros((2, 1))
+    # g[0] += (0.0216*np.cos(q[0] + q[1]) - 0.1190*np.sin(q[0] + q[1]) - a1*np.sin(q[0]))*constants.g*m2 + (- 0.0574*np.cos(q[0]) - 0.0162*np.sin(q[0]))*constants.g*m1
+    # g[1] += constants.g*m2*(0.0216*np.cos(q[1] + q[0]) - 0.1190*np.sin(q[1] + q[0]))
 
 
     R_d = T_d[0:3, 0:3]
-    T = np.vstack((np.hstack((R_d, np.zeros((3, 3)))), np.hstack((np.zeros((3, 3)), R_d))))
+    T = np.vstack((np.hstack((R_d.T, np.zeros((3, 3)))), np.hstack((np.zeros((3, 3)), R_d.T))))
     J_a_d = Jacobian[[0, 2]]
-    
+    # J_a_d = T @ Jacobian
+    # J_a_d = J_a_d[[0, 2]]
     control_output = np.zeros((2, 1))
-    control_output = J_a_d.T @ (Kp @ x_error - Kd @ (J_a_d @ qd))
+    control_output = g + J_a_d.T @ (Kp @ x_error - Kd @ (J_a_d @ qd))
     return control_output
 
 if __name__ == "__main__":
     robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
     ax, fig = plt.subplots()
 
-    q = np.array([-np.pi/4,  np.pi/2])
+    q = np.array([0.46,  1.3156])
     x = robot.forward_kinematics(q)[[0, 2], -1]
     x_d = np.array([0.0, -0.3])
-    Kp = np.diag([50.0, 10.0])
+    Kp = np.diag([100.0, 10.0])
     Kd = np.diag([0.0, 0.0])
-    qd = np.array([-0.001, 0.1])
+    qd = np.array([0.0, 0.0])
     q_d = robot.inverse_kinematics(x_d)[0]
     T_d = robot.forward_kinematics(q_d)
     R_d = T_d[0:3, 0:3]
-    print(np.round(R_d, 10))
+    # print(np.round(R_d, 10))
     T = np.vstack((np.hstack((R_d, np.zeros((3, 3)))), np.hstack((np.zeros((3, 3)), R_d))))
     jacobian = robot.jacobian(q)
     v = jacobian @ np.array([[1],[0.1]])
     vt = T @ jacobian @ np.array([[1],[0]])
-    print(np.round(jacobian, 10))
-    print(np.round(v, 10))
-    print(np.round(T @ v, 10))
+    # print(np.round(jacobian, 10))
+    # print(np.round(v, 10))
+    # print(np.round(T @ v, 10))
     robot.plot_robot_arm(q, x, fig, ax, "current")
     robot.plot_robot_arm(q_d, x_d, fig, ax, "desired")
     plt.quiver(x[0], x[1], v[0], v[2], angles='xy', scale_units='xy', scale=1, color='r', label='velocity vector')
