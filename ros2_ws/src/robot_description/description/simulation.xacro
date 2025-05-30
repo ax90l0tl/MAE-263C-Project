@@ -100,6 +100,7 @@
       filename="gz-sim-joint-state-publisher-system"
       name="gz::sim::systems::JointStatePublisher">
       <topic>model/robot/joint_states</topic>
+      <joint_name>slider_joint</joint_name>
       <joint_name>hip_joint</joint_name>
       <joint_name>knee_joint</joint_name>
     </plugin>
