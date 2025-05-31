@@ -1,7 +1,7 @@
 
 %%
-function dXdt = robot_dyn(t,X,p)
-sim_t = t
+function [dXdt,u,F] = robot_dyn(t,X,p)
+% sim_t = t; % Uncomment to Output Simulation Time during Runtime
 
 params = p.params;
 
@@ -25,7 +25,7 @@ friction = [0 0 0]';
 % External Force Applications
 % tau = fcn_controller(t,X,p);
 tau = [0 0 0]';
-contact = fcn_contac
+% contact = fcn_contact_check;
 % f_contact = fcn_contact(t,X,p);
 % f_disturb   = fcn_disturbance(t);
 f_contact = [0 0]';
