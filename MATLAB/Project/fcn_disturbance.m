@@ -2,7 +2,7 @@ function f = fcn_disturbance(t)%,X,p) % Applied Step Force to the Base
 % params = p.params;
 % q = X(1:3);
 % J2t = fcn_J2(q,params)';
-magnitude = 2;
+magnitude = 20;
 start_time = 0.5;
 step_duration = 1;
 

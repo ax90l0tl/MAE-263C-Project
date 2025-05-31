@@ -10,10 +10,11 @@ p4 = fcn_p4(q,params);
 
 chain = [p2 p3 p4];
 
-
-plot(chain(1,:),chain(2,:),'color','white','linewidth',4);
+rectangle('Position',[p2(1)-params(3)/4,p2(2)-params(3)/4, params(3)/2,params(3)/2],'FaceColor','blue', 'EdgeColor','none')
 hold on
+plot(chain(1,:),chain(2,:),'color','white','linewidth',4);
 plot(chain(1,:),chain(2,:),'ocyan','LineWidth',4);
+
 % plot(0,0,'or','LineWidth',4);
 yline(0,'--white')
 grid on
