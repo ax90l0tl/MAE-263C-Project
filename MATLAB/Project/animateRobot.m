@@ -13,7 +13,7 @@ end
 f = figure;
 set(f, 'doublebuffer', 'on');
 for k = 1:length(timeA) 
-    
+    clf
     %Current robot state interpolation
     theta1 = interp1(tin,Xin(1,:),timeA(k));
     theta2 = interp1(tin,Xin(2,:),timeA(k));
