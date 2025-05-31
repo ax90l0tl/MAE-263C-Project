@@ -66,7 +66,10 @@ T23 = [rot(q3), [l2,0]';
        0 0 1];
 T34 = [eye(2) , [l3,0]';
        0 0 1];
-
+write_fcn_m('fcn_T01.m',{'q','p'},[m_list_q;m_list_params],{T01,'T01'});
+write_fcn_m('fcn_T12.m',{'q','p'},[m_list_q;m_list_params],{T12,'T12'});
+write_fcn_m('fcn_T23.m',{'q','p'},[m_list_q;m_list_params],{T23,'T23'});
+write_fcn_m('fcn_T34.m',{'q','p'},[m_list_q;m_list_params],{T34,'T34'});
 % Joint Positions
 
 T02 = T01 * T12;
@@ -75,7 +78,7 @@ J2 = jacobian(p2,q);
 write_fcn_m('fcn_p2.m',{'q','p'},[m_list_q;m_list_params],{p2,'p2'});
 write_fcn_m('fcn_J2.m',{'q','p'},[m_list_q;m_list_params],{J2,'J2'});
 
-T03 = T01 * T12 * T23;
+T03 = T02 * T23;
 p3 = T03(1:2,3);
 write_fcn_m('fcn_p3.m',{'q','p'},[m_list_q;m_list_params],{p3,'p3'});
 
@@ -84,6 +87,13 @@ p4 = T04(1:2,3);
 J4 = jacobian(p4,q);
 write_fcn_m('fcn_p4.m',{'q','p'},[m_list_q;m_list_params],{p4,'p4'});
 write_fcn_m('fcn_J4.m',{'q','p'},[m_list_q;m_list_params],{J4,'J4'});
+
+% Foot w.r.t to Base 
+T14 = T12*T23*T34;
+p14 = T14(1:2,3);
+J14 = jacobian(p14,q);
+write_fcn_m('fcn_p14.m',{'q','p'},[m_list_q;m_list_params],{p14,'p14'});
+write_fcn_m('fcn_J14.m',{'q','p'},[m_list_q;m_list_params],{J14,'J14'});
 
 % Jacobian Derivative 
 dJ4 = sym('dJ4',size(J4));
