@@ -21,7 +21,7 @@ sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-r
 1. Clone this repo
 2. Make `envs` folder in home dir (You can make this wherever if you're familiar with Linux, but you will have to change the paths in the later commands)
    ```
-   mkdir envs && cd envs
+   cd && mkdir envs && cd envs
    ```
 3. Make python venv
    ```
@@ -35,9 +35,9 @@ sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-r
    ```
    source ~/envs/ros2/bin/activate
    ```
-6. Install Python packages
+6. Go to where you cloned this repo and install Python packages
    ```
-   pip install -r requirements.txt
+   cd && cd ~/MAE-263C-Project && pip install -r requirements.txt
    ```
 7. Source ros
    ```
@@ -52,7 +52,11 @@ sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-r
    sudo rosdep init
    rosdep update
    ```
-10. Run rosdep
+10. Go to `ros2_ws`
+    ```
+    cd ~/MAE-263C-Project/ros2 ws
+    ```
+11. Run rosdep
    ```
    rosdep install --from-paths src -y --ignore-src
    ```
@@ -78,9 +82,9 @@ sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-r
    ```
 
 ## Helpful Commands
-* I like to make aliases in my `~\.bashrc` for all the ROS2 sourcing commands (Double check all paths)
+* I like to make aliases in my `~\.bashrc` for all the ROS2 sourcing commands (Double check all paths). You can copy-paste this into the terminal.
     ```
-    alias src-ros2='source /opt/ros/jazzy/setup.bash && source /usr/share/colcon_cd/function/colcon_cd.sh && export _colcon_cd_root=/opt/ros/jazzy/ && source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash && export QT_QPA_PLATFORMTHEME=qt5ct && export GZ_VERSION=harmonic && cd ~/MAE-263C-Project/ros2_ws && source ~/envs/ros2/bin/activate && source install/setup.bash'
+    echo "alias src-ros2='source /opt/ros/jazzy/setup.bash && source /usr/share/colcon_cd/function/colcon_cd.sh && export _colcon_cd_root=/opt/ros/jazzy/ && source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash && export QT_QPA_PLATFORMTHEME=qt5ct && export GZ_VERSION=harmonic && cd ~/MAE-263C-Project/ros2_ws && source ~/envs/ros2/bin/activate && source install/setup.bash'" >> ~/.bashrc
     ```
     Now I just need to type:
     ```

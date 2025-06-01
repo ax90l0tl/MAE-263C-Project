@@ -12,7 +12,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         # Include all launch files.
-        (os.path.join('share', package_name, 'launch'), glob('launch/*'))
+        (os.path.join('share', package_name, 'launch'), glob('launch/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -25,6 +25,7 @@ setup(
         'console_scripts': [
             'pid_control_node = robot_control.pid_control_node:main',
             'active_compliance_control_node = robot_control.active_compliance_control_node:main',
+            'impedence_control_node = robot_control.impedence_control_node:main',
         ],
     },
 )

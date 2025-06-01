@@ -29,10 +29,14 @@
     <link name="base_link">
         <visual>
             <geometry>
-                <mesh filename="file://$(find robot_description)/meshes/base_link.STL" />
-                <!-- for preview -->
-                <!-- <mesh filename="../meshes/base_link.STL" /> -->
-                <!-- <box size="${L1_length} 0.05 0.02" /> -->
+                <xacro:if value="$(arg use_sim_time)">
+                    <mesh filename="file://$(find robot_description)/meshes/base_link.STL" />
+                </xacro:if>
+                <xacro:unless value="$(arg use_sim_time)">
+                    <!-- for preview -->
+                    <mesh filename="../meshes/base_link.STL" />
+                    <!-- <box size="${L1_length} 0.05 0.02" /> -->
+                </xacro:unless>
             </geometry>
             <material name="red">
                 <color rgba="1 0 0 1" />
@@ -59,10 +63,14 @@
         <visual>
             <!-- <origin xyz="${L1_length/2} 0 0" rpy="0 0 0" /> -->
             <geometry>
-                <mesh filename="file://$(find robot_description)/meshes/hip.STL" />
-                <!-- for preview -->
-                <!-- <mesh filename="../meshes/hip.STL" /> -->
-                <!-- <box size="${L1_length} 0.05 0.02" /> -->
+                <xacro:if value="$(arg use_sim_time)">
+                    <mesh filename="file://$(find robot_description)/meshes/hip.STL" />
+                </xacro:if>
+                <xacro:unless value="$(arg use_sim_time)">
+                    <!-- for preview -->
+                    <mesh filename="../meshes/hip.STL" />
+                    <!-- <box size="${L1_length} 0.05 0.02" /> -->
+                </xacro:unless>
             </geometry>
             <material name="blue">
                 <color rgba="0 0 1 1" />
@@ -96,10 +104,14 @@
         <visual>
             <!-- <origin xyz="${L2_length/2} 0 0" rpy="0 0 0" /> -->
             <geometry>
-                <mesh filename="file://$(find robot_description)/meshes/knee.STL" />
-                <!-- for preview -->
-                <!-- <mesh filename="../meshes/knee.STL" /> -->
-                <!-- <box size="${L2_length} 0.05 0.02" /> -->
+                <xacro:if value="$(arg use_sim_time)">
+                    <mesh filename="file://$(find robot_description)/meshes/knee.STL" />
+                </xacro:if>
+                <xacro:unless value="$(arg use_sim_time)">
+                    <!-- for preview -->
+                    <mesh filename="../meshes/knee.STL" />
+                    <!-- <box size="${L2_length} 0.05 0.02" /> -->
+                </xacro:unless>
             </geometry>
             <material name="green">
                 <color rgba="0 1 0 1" />
@@ -135,10 +147,14 @@
     <link name="foot_link">
         <visual>
             <geometry>
-                <mesh filename="file://$(find robot_description)/meshes/foot.STL" />
-                <!-- for preview -->
-                <!-- <mesh filename="../meshes/foot.STL" /> -->
-                <!-- <sphere radius="0.05" /> -->
+                <xacro:if value="$(arg use_sim_time)">
+                    <mesh filename="file://$(find robot_description)/meshes/foot.STL" />
+                </xacro:if>
+                <xacro:unless value="$(arg use_sim_time)">
+                    <!-- for preview -->
+                    <mesh filename="../meshes/foot.STL" />
+                    <!-- <sphere radius="0.05" /> -->
+                </xacro:unless>
             </geometry>
             <material name="red">
                 <color rgba="1 0 0 1" />
