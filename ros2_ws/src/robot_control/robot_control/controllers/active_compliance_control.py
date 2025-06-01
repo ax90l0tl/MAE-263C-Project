@@ -3,7 +3,7 @@ from robot_control.robot_utilities.robot_kinematics import Robot
 from scipy import constants
 import matplotlib.pyplot as plt
 
-def active_compliance_control(x_d, x_e, Jacobian, Kp, Kd, q, qd, a1, a2, m0, m1, m2, q_d, T_d):
+def active_compliance_control(x_d, x_e, q, qd, robot, Kp, Kd):
 
     """
     Compute the control output for active compliance control.
@@ -25,28 +25,32 @@ def active_compliance_control(x_d, x_e, Jacobian, Kp, Kd, q, qd, a1, a2, m0, m1,
     x_error = np.atleast_2d(x_d - x_e).T
     print("x_error: ", x_error)
     qd = np.atleast_2d(qd.copy()).T
+    J = robot.jacobian(q)
+    T_0_T = robot.forward_kinematics2(q)
+    R_0_T = T_0_T[:3, :3]
+    R_T_0 = R_0_T.T
+
+    q_d = robot.inverse_kinematics(x_d)[0]
+    
+    T_d = robot.forward_kinematics2(q_d)
     # COM in urdf is defined at the base of the link TODO need to change
     # Treat base link mass as point mass
     # Treat gravity as normal force
-    # g = Jacobian.T @ np.array([[0], [0], [m0 * constants.g], [0], [0], [0]])
-    # print(g)
-    g = np.zeros((2, 1))
-    # g[0] += (0.0216*np.cos(q[0] + q[1]) - 0.1190*np.sin(q[0] + q[1]) - a1*np.sin(q[0]))*constants.g*m2 + (- 0.0574*np.cos(q[0]) - 0.0162*np.sin(q[0]))*constants.g*m1
-    # g[1] += constants.g*m2*(0.0216*np.cos(q[1] + q[0]) - 0.1190*np.sin(q[1] + q[0]))
+    T_e = np.vstack((np.hstack((R_T_0, np.zeros((3, 3)))), 
+                    np.hstack((np.zeros((3, 3)), R_T_0))))
+    g = J.T @ T_e @ np.array([[0], [0], [-robot.inertial_properties[0]['mass'] * constants.g], [0], [0], [0]])
 
+    M, V, G = robot.dynamics(q, qd)
 
-    R_d = T_d[0:3, 0:3]
-    T = np.vstack((np.hstack((R_d.T, np.zeros((3, 3)))), np.hstack((np.zeros((3, 3)), R_d.T))))
-    J_a_d = Jacobian[[0, 2]]
-    # J_a_d = T @ Jacobian
-    # J_a_d = J_a_d[[0, 2]]
+    J_a_d = J[[0, 2]]
+
     control_output = np.zeros((2, 1))
-    control_output = g + J_a_d.T @ (Kp @ x_error - Kd @ (J_a_d @ qd))
+    control_output = g + G + J_a_d.T @ (Kp @ x_error - Kd @ (J_a_d @ qd))
     return control_output
 
 if __name__ == "__main__":
     robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
-    ax, fig = plt.subplots()
+    fig, ax = plt.subplots()
 
     q = np.array([0.46,  1.3156])
     x = robot.forward_kinematics(q)[[0, 2], -1]
