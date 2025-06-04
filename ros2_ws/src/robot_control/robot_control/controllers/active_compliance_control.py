@@ -33,19 +33,28 @@ def active_compliance_control(x_d, x_e, q, qd, robot, Kp, Kd):
     q_d = robot.inverse_kinematics(x_d)[0]
     
     T_d = robot.forward_kinematics2(q_d)
+    R_d = T_d[:3, :3]
+    R_d_T = R_d.T
+
+    T_d = np.vstack((np.hstack((R_d_T, np.zeros((3, 3)))), 
+                    np.hstack((np.zeros((3, 3)), R_d_T))))
     # COM in urdf is defined at the base of the link TODO need to change
     # Treat base link mass as point mass
     # Treat gravity as normal force
-    T_e = np.vstack((np.hstack((R_T_0, np.zeros((3, 3)))), 
-                    np.hstack((np.zeros((3, 3)), R_T_0))))
-    g = J.T @ T_e @ np.array([[0], [0], [-robot.inertial_properties[0]['mass'] * constants.g], [0], [0], [0]])
+    # T_e = np.vstack((np.hstack((R_T_0, np.zeros((3, 3)))), 
+                    # np.hstack((np.zeros((3, 3)), R_T_0))))
+    # g = J.T @ np.array([[0], [0], 
+                            #   [(robot.inertial_properties[0]['mass'] + robot.inertial_properties[1]['mass'] + robot.inertial_properties[2]['mass']) * constants.g], 
+                            #   [0], [0], [0]])
 
     M, V, G = robot.dynamics(q, qd)
 
+    
+    # J_a_d = (T_d @ J )[[0, 2]]
     J_a_d = J[[0, 2]]
-
+    # print("g", g)
     control_output = np.zeros((2, 1))
-    control_output = g + G + J_a_d.T @ (Kp @ x_error - Kd @ (J_a_d @ qd))
+    control_output = G + J_a_d.T @ (Kp @ x_error - Kd @ (J_a_d @ qd))
     return control_output
 
 if __name__ == "__main__":

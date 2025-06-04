@@ -58,7 +58,7 @@ class active_compliance_control_node(Node):
         self.jump = False
         self.state = states['IDLE']
         
-        self.default_pose = np.array([0.0, -0.3])
+        self.default_pose = np.array([-0.3, 0.0])
         self.x_d = self.default_pose
         self.q = np.zeros(2)
         self.qd = np.zeros(2)

@@ -22,7 +22,7 @@
         <child link="base_link" />
         <origin xyz="0 0 1.0" rpy="0 0 0" />
         <axis xyz="0 0 1" />
-        <limit effort="0" lower="-10" upper="10" velocity="100.0" />
+        <limit effort="0" lower="-10.0" upper="10" velocity="100.0" />
         <dynamics damping="0.0" friction="0.0" />
     </joint>
 

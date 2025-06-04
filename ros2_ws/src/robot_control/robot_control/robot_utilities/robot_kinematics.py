@@ -32,7 +32,7 @@ class Robot:
             if joint['type'] == 'fixed':
                 theta = joint['theta']
             elif joint['type'] == 'revolute':
-                theta = joint_angles[i - 1] + joint['offset']
+                theta = joint_angles[i - 1] - joint['offset']
             elif joint['type'] == 'prismatic':
                 continue
             alpha = joint['alpha']
@@ -54,8 +54,8 @@ class Robot:
         a2 = self.dh_params[3]['a']
         q1 = joint_angles[0]
         q2 = joint_angles[1]
-        T = np.array([[-np.sin(q2 + q1), -np.cos(q2 + q1), 0, - a2*np.sin(q2 + q1) - a1*np.sin(q1)],
-                  [0, 0, 1, 0],
+        T = np.array([[np.sin(q2 + q1), np.cos(q2 + q1), 0, a2*np.sin(q2 + q1) + a1*np.sin(q1)],
+                  [0, 0, -1, 0],
                   [-np.cos(q2 + q1),  np.sin(q2 + q1), 0, - a2*np.cos(q2 + q1) - a1*np.cos(q1)],
                   [0, 0, 0, 1],])
         return T
@@ -115,12 +115,12 @@ class Robot:
         q2 = joint_angles[1]
 
         J = np.zeros((6, 2))
-        J[0, 0] = -a2*np.cos(q1 + q2) - a1*np.cos(q1)
-        J[0, 1] = -a2*np.cos(q1 + q2)
+        J[0, 0] = a2*np.cos(q1 + q2) + a1*np.cos(q1)
+        J[0, 1] = a2*np.cos(q1 + q2)
         J[2, 0] = a2*np.sin(q1 + q2) + a1*np.sin(q1)
         J[2, 1] = a2*np.sin(q1 + q2)
-        J[4, 0] = 1
-        J[4, 1] = 1
+        J[4, 0] = -1
+        J[4, 1] = -1
         return J
     
     def jacobian_square(self, joint_angles):
@@ -136,8 +136,8 @@ class Robot:
         q1d = joint_velocity[0]
         q2d = joint_velocity[1]
         J = np.zeros((6, 2))
-        J[0, 0] = q1d*(a2*np.sin(q2 + q1) + a1*np.sin(q1)) + a2*q2d*np.sin(q2 + q1)
-        J[0, 1] = a2*np.sin(q2 + q1)*(q2d + q1d)
+        J[0, 0] = -q1d*(a2*np.sin(q2 + q1) + a1*np.sin(q1)) - a2*q2d*np.sin(q2 + q1)
+        J[0, 1] = -a2*np.sin(q2 + q1)*(q2d + q1d)
         J[2, 0] = q1d*(a2*np.cos(q2 + q1) + a1*np.cos(q1)) + a2*q2d*np.cos(q2 + q1)
         J[2, 1] = a2*np.cos(q2 + q1)*(q2d + q1d)
         return J
@@ -153,9 +153,11 @@ class Robot:
         m2 = self.inertial_properties[2]['mass'] + self.inertial_properties[3]['mass']
         I1 = self.inertial_properties[1]['inertia']
         # need to divide urdf values by 10 (URDF izz is scaled up for simulation stability)
-        I1zz = I1[2, 2]/10
+        # I1zz = I1[2, 2]/10
+        I1zz = I1[2, 2]
         I2 = self.inertial_properties[2]['inertia']
-        I2zz = I2[2, 2]/10
+        # I2zz = I2[2, 2]/10
+        I2zz = I2[2, 2]
         a1 = self.dh_params[2]['a']
         a2 = self.dh_params[3]['a']
         q1 = joint_angles[0]
@@ -270,16 +272,17 @@ if __name__ == "__main__":
 
     # print((j))
     # print(robot.jacobian([np.pi/2, 0]))
-    fig, ax = plt.subplots()
-    robot.plot_robot_arm(j[1], pose, fig, ax)
-    robot.plot_robot_arm([0, 0], pose, fig, ax)
-    robot.plot_robot_arm(robot.inverse_kinematics([0.0, -0.115])[1], pose, fig, ax)
-    plt.grid()
-    plt.show()
+    # fig, ax = plt.subplots()
+    # robot.plot_robot_arm(j[1], pose, fig, ax)
+    # robot.plot_robot_arm([0, 0], pose, fig, ax)
+    # robot.plot_robot_arm(robot.inverse_kinematics([0.0, -0.115])[1], pose, fig, ax)
+    # plt.grid()
+    # plt.show()
     # robot.plot_robot_arm(j[0], pose)
-    # robot.forward_kinematics(j[0])
+    print(np.round(robot.forward_kinematics([0.46, -2.340]), 4))
+    print(np.round(robot.forward_kinematics2([0.46, -2.340]), 4))
     # robot.forward_kinematics(j[1])
-    robot.draw_workspace(plot=True, density=200)
+    # robot.draw_workspace(plot=True, density=200)
     # T = robot.forward_kinematics([-2.80, 2.62])
     # print(T)
     # print(robot.inverse_kinematics([T[0, 3], T[2, 3]]))
