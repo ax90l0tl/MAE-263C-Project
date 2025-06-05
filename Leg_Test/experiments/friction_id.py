@@ -83,7 +83,7 @@ data = np.array(data)
 data = data[data[:, 0].argsort()]  # Sort by velocity (first column)
 
 # Save logic
-csv_base = "friction_id_KM121"
+csv_base = "friction_id_KM115"
 csv_dir = "."  # or "output"
 os.makedirs(csv_dir, exist_ok=True)
 i = 0
