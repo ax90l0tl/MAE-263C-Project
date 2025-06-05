@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import constants
-from math import sin, cos, pi, radians
+from math import sin, cos, acos, pi, sqrt, radians
 
 class pd_grav_comp_control:
     def __init__(self, l1 = 0.125, l2 = 0.215, lc1 = 0.0613, lc2 = 0.11, m0 = 0.649, m1 = 0.478, m2 = 0.0633, th = 77.52):
@@ -34,12 +34,20 @@ class pd_grav_comp_control:
                 self.m1 * g * self.lc1 * cos(q1 + self.th) + self.m2 * g * (self.l1 * cos(q1) + self.lc2 * cos(q1 + q2)),
                 self.m2 * g * self.lc2 * cos(q1 + q2)
             ])
-            # grav_torque = np.array([0, 0])
         elif phase == 'STANCE':
-            # Assuming that the contact is directly below the Z axis (WIP)
+            # Ignoring the friction in +/- x direction experienced by the foot
             m0, m1, m2 = self.m0, self.m1, self.m2
-            tau = - (m0 + m1 + m2) * g * self.l2 * cos(q1 + q2) + m2 * g * self.lc2 * sin(q1 + q2)
-            grav_torque = np.array([0, tau])  # Note: Command negative torque(iq) on knee joint to counteract gravity
+            q1p = q2 + (q1 + pi)
+            q2p = - q2
+            lc2p = self.l2 - self.lc2
+            lc1p = sqrt(self.l1**2 + self.lc1**2 - 2*self.l1*self.lc1*cos(self.th))
+            thp = acos((self.l1**2 + lc1p**2 - self.lc1**2) / (2*self.l1*lc1p))
+
+            tau1 = (m2*g * lc2p*cos(q1p) + 
+                    m0*g * (self.l1*cos(q1p+q2p)+self.l2*cos(q1p)) + 
+                    m1*g * (lc1p*cos(q1p+q2p-thp)+self.l2*cos(q1p)))
+            tau2 = - (m0 + m1 + m2) * g * self.l2 * cos(q1 + q2) + m2 * g * self.lc2 * sin(q1 + q2)
+            grav_torque = np.array([tau1, tau2]) 
             # print(f"grav_torque: {grav_torque}")
         else:
             grav_torque = np.array([0, 0])
