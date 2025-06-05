@@ -5,3 +5,5 @@ venv/
 env/
 ENV/
 
+# Jupyter notebooks
+# *.ipynb
