@@ -16,7 +16,7 @@ except mscl.Error as e:
     print("Error:", e)
     exit(1)
 
-# To use an GPIO pin, we first need to configure it
+# To use a GPIO pin, we first need to configure it
 try:
     new_config = mscl.GpioConfiguration()
     new_config.pin = GPIO_PIN  # GPIO pin number
