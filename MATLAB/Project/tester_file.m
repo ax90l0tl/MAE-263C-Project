@@ -1,0 +1,1 @@
+[dxdt_test, u_test, F_test] = robot_dyn_stance_jump(t,X,p)
