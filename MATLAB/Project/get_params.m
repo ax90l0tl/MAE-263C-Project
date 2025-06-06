@@ -1,12 +1,6 @@
 function p = get_params()
-
-% Gains Matrices
-%       Stance Phase
-p.Kp_stance = diag(10 * [1 1]);
-p.Kd_stance = diag(1 * [1 1]);
-%       Aerial Phase
-p.Kp_aerial = diag(10 * [1 1]);
-p.Kd_aerial = diag(1 * [1 1]);
+% Place to Pre-Load Global Static Variables, as well as pass them in and
+% out of functions
 
 % parameters for matrix calculations
 
@@ -24,6 +18,25 @@ l3 = l2;
 M1 = 5; % unit: Kilogram
 M2 = 3;
 M3 = 2;
+
+p.time_stance = 0.25;
+p.jump_force = 1.5 * (M1+M2+M3)*g;
+
+p.threshold = 0.025 * sum(M1 + M2 + M3) * g;
+
+% Gains Matrices
+%       Stance Phase
+p.Kp_stance = diag(10 * [1 1]);
+p.Kd_stance = diag(1 * [1 1]);
+%       Jump   Phase
+p.Kp_jump = diag(2.5 * [1 1]);
+p.Kd_jump = diag(0.25 * [1 1]);
+
+%       Aerial Phase
+p.Kp_aerial = diag(10 * [1 1]);
+p.Kd_aerial = diag(1 * [1 1]);
+
+
 
 %Links inertia tensors (Note: J_ij = J_ji)
 %Link 1
