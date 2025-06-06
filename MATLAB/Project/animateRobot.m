@@ -1,5 +1,9 @@
 function animateRobot(tin,Xin,p)
 
+if size(Xin,2) == 6
+    Xin = Xin';
+end
+
 %------------------------------------------------------------------------
 %ANIMATION
 dtA = 0.05;             %Time step of animation

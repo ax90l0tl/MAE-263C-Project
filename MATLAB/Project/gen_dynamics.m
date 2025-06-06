@@ -9,6 +9,7 @@ syms J1_xx J1_yy J1_zz J1_xy J1_xz J1_yz real
 syms J2_xx J2_yy J2_zz J2_xy J2_xz J2_yz real
 syms J3_xx J3_yy J3_zz J3_xy J3_xz J3_yz real
 syms g real
+syms X Y real
 
 %% Variable List
 
@@ -52,9 +53,24 @@ m_list_dq = {
     'dq2' 'dq(2)';
     'dq3' 'dq(3)'};
 
+% task space position
+m_list_p = {
+    'X' 'pos(1)';
+    'Y' 'pos(2)'};
+
 %% Joint Variables
 q = [q1 q2 q3]'; % height, theta1, theta2
 dq = [dq1 dq2 dq3]';
+
+%% IK - 2D [From Base to Foot]
+pos = [X , Y]';
+
+length_int = norm(pos);
+theta_2 = pi - acos((l2^2 + l3^2 - length_int^2)/(2*l2*l3));
+theta_1 = atan2( Y , X ) - atan2(l3*sin(theta_2),(l2+l3*cos(theta_2))) + pi/2;
+
+q_IK = [ theta_1 theta_2 ]';
+write_fcn_m('fcn_IK.m',{'pos','p'},[m_list_p;m_list_params],{q_IK,'q_IK'});
 
 %% FK - 2D
 
@@ -88,19 +104,43 @@ J4 = jacobian(p4,q);
 write_fcn_m('fcn_p4.m',{'q','p'},[m_list_q;m_list_params],{p4,'p4'});
 write_fcn_m('fcn_J4.m',{'q','p'},[m_list_q;m_list_params],{J4,'J4'});
 
-% Foot w.r.t to Base 
+% Foot w.r.t to Base of Prismatic
 T14 = T12*T23*T34;
 p14 = T14(1:2,3);
 J14 = jacobian(p14,q);
 write_fcn_m('fcn_p14.m',{'q','p'},[m_list_q;m_list_params],{p14,'p14'});
 write_fcn_m('fcn_J14.m',{'q','p'},[m_list_q;m_list_params],{J14,'J14'});
 
+% Foot w.r.t to Hip Joint
+T23 = T23 * T34;
+p24 = T24(1:2,3);
 % Jacobian Derivative 
 dJ4 = sym('dJ4',size(J4));
 for ii = 1:size(dJ4,2)
     dJ4(:,ii) = jacobian(J4(:,ii),q) * dq;
 end
 write_fcn_m('fcn_dJ4.m',{'q','dq','p'},[m_list_q;m_list_dq;m_list_params],{dJ4,'dJ4'});
+
+%% Foot Constraints
+
+% Point of Contact is the toe position at impact time
+point_contact = [0 , 0 , 0]';
+z_hat = [ 0 0 1 ]';
+y_hat = [ 0 1 0 ]';
+x_hat = [ 1 0 0 ]';
+R = [ x_hat y_hat z_hat];
+
+%%
+% The Holonomic constraints are:
+% foot position x and y in Toe Frame do not change during stance
+hol_con = p4([1,2]);
+Jhc = jacobian(hol_con,q);
+dJhc = sym('dJhc',size(Jhc));
+for ii = 1:size(Jhc,2)
+    dJhc(:,ii) = jacobian(Jhc(:,ii),q) * dq;
+end
+write_fcn_m('fcn_Jhc.m',{'q','p'},[m_list_q;m_list_params],{Jhc,'Jhc'});
+write_fcn_m('fcn_dJhc.m',{'q', 'dq', 'p'},[m_list_q;m_list_dq;m_list_params],{dJhc,'dJhc'});
 
 %% COM Kinematics
 T1com = [eye(2), [l1/2,0]';
