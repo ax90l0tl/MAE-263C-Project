@@ -29,11 +29,11 @@ def torque2iq(u):
 
 # User-modifiable parameters
 bear_baudrate = 8000000
-bear_port = 'COM3'
+bear_port = 'COM9'
 bear_ids = []
 bear_kt = 1.16  # Nm/A, from BEAR SDK. Koala: 0.35, Koala MB: 1.16.
-u_range = [-0.3, 0.3]
-n_samples = 40  # Number of samples between 0 and positive/negative u max
+u_range = [-1, 1]
+n_samples = 25  # Number of samples between 0 and positive/negative u max
 delay = 2       # Delay between torque commands in seconds
 
 # Initialize bear manager
