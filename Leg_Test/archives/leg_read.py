@@ -1,7 +1,7 @@
 from pybear import Manager
 from pybear.CONTROL_TABLE import *
 from math import pi
-from pd_grav_comp_control import *
+from Leg_Test.controllers.pd_grav_comp_controller import *
 import numpy as np
 import sys
 import time
@@ -61,7 +61,7 @@ for id in bear_ids:
     bear.set_mode((id, 0))
     time.sleep(0.1)
 
-controller = pd_grav_comp_control()  # Leave blank if using the default values
+controller = pdGravCompController()  # Leave blank if using the default values
 # controller = pd_grav_comp_control(l1, l2, lc1, lc2, m1, m2)
 
 input("Press Enter to start listening to joint readings and calculate FK.")

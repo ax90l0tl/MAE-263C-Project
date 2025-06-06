@@ -2,7 +2,7 @@ import numpy as np
 from scipy import constants
 from math import sin, cos, acos, pi, sqrt, radians
 
-class pd_grav_comp_control:
+class pdGravCompController:
     def __init__(self, l1 = 0.125, l2 = 0.215, lc1 = 0.0613, lc2 = 0.11, m0 = 0.649, m1 = 0.478, m2 = 0.0633, th = 77.52):
         self.l1 = l1
         self.l2 = l2
@@ -17,9 +17,10 @@ class pd_grav_comp_control:
     def calc_control_torque(self, q_des_rad, q_rad, qd_rad_s, Kp, Kd, phase = 'AERIAL'):
         q_error = q_des_rad - q_rad
 
-        # PD control with gravity compensation
+        # PD control with gravity and friction compensation
         grav_comp_torques = self.calc_grav_comp_torque(q_rad, phase)
-        u = grav_comp_torques + Kp @ q_error - Kd @ qd_rad_s
+        friction_comp_torques = self.calc_friction_torque(qd_rad_s)
+        u = grav_comp_torques + friction_comp_torques + Kp @ q_error - Kd @ qd_rad_s
 
         return u
 
@@ -30,7 +31,7 @@ class pd_grav_comp_control:
         g = constants.g
 
         if phase == 'AERIAL':
-            grav_torque = -np.array([
+            grav_torque = np.array([
                 self.m1 * g * self.lc1 * cos(q1 + self.th) + self.m2 * g * (self.l1 * cos(q1) + self.lc2 * cos(q1 + q2)),
                 self.m2 * g * self.lc2 * cos(q1 + q2)
             ])
@@ -53,6 +54,29 @@ class pd_grav_comp_control:
             grav_torque = np.array([0, 0])
 
         return grav_torque
+    
+    def calc_friction_torque(self, qd_rad_s):
+        minimum_velocity = (1.08 + 3.32 + 0.86) / 3  # rad/s
+        slope_near_zero = (0.192 + 0.113 + 0.243) / 3
+
+        viscous_pos = (0.045 + 0.034 + 0.027) * 0.1 / 3
+        viscous_neg = (0.55 + 0.032 + 0.024) * 0.1 / 3
+        coulomb_pos = (0.139 + 0.258 + 0.255) * 0.1 / 3
+        coulomb_neg = (-0.074 - 0.280 - 0.265) * 0.1 / 3
+
+        u_fric = []
+        for qd in qd_rad_s:
+            if qd > minimum_velocity:
+                val = viscous_pos * qd + coulomb_pos
+                # print(f"Positive velocity: {qd:.6f} rad/s, u: {val:.6f} Nm")
+                u_fric.append(val)
+            elif qd < -minimum_velocity:
+                val = viscous_neg * qd + coulomb_neg
+                # print(f"Positive velocity: {qd:.6f} rad/s, u: {val:.6f} Nm")
+                u_fric.append(val)
+            else:
+                u_fric.append(slope_near_zero * qd)
+        return np.array(u_fric)
     
     def calculate_FK(self, q):
         q1, q2 = q
