@@ -13,6 +13,13 @@ class Robot:
         self.joint_properties = self.urdf_parser.get_joint_properties()
         self.dh_params = self.urdf_parser.get_DH_params()
 
+        a1 = self.dh_params[2]['a']
+        a2 = self.dh_params[3]['a']
+        m1 = self.inertial_properties[1]['mass']
+        m2 = self.inertial_properties[2]['mass']
+        m0 = self.inertial_properties[0]['mass']
+
+
 
     def forward_kinematics(self, joint_angles):
         """
@@ -39,7 +46,18 @@ class Robot:
             ])
             T = np.dot(T, T_i)
 
-        print(np.round(T, 10))
+        # print(np.round(T, 10))
+        return T
+    
+    def forward_kinematics2(self, joint_angles):
+        a1 = self.dh_params[2]['a']
+        a2 = self.dh_params[3]['a']
+        q1 = joint_angles[0]
+        q2 = joint_angles[1]
+        T = np.array([[np.sin(q2 + q1), np.cos(q2 + q1), 0, a2*np.sin(q2 + q1) + a1*np.sin(q1)],
+                  [0, 0, -1, 0],
+                  [-np.cos(q2 + q1),  np.sin(q2 + q1), 0, - a2*np.cos(q2 + q1) - a1*np.cos(q1)],
+                  [0, 0, 0, 1],])
         return T
     
     def inverse_kinematics(self, target_position: NDArray) -> NDArray:
@@ -97,25 +115,32 @@ class Robot:
         q2 = joint_angles[1]
 
         J = np.zeros((6, 2))
-        J[0, 0] = -a2*np.cos(q1 + q2) - a1*np.cos(q1)
-        J[0, 1] = -a2*np.cos(q1 + q2)
+        J[0, 0] = a2*np.cos(q1 + q2) + a1*np.cos(q1)
+        J[0, 1] = a2*np.cos(q1 + q2)
         J[2, 0] = a2*np.sin(q1 + q2) + a1*np.sin(q1)
         J[2, 1] = a2*np.sin(q1 + q2)
-        J[4, 0] = 1
-        J[4, 1] = 1
+        J[4, 0] = -1
+        J[4, 1] = -1
         return J
     
-    def trajectory(self, start, end, steps=10, ):
-        """
-        Generate a trajectory from start to end position.
-        :param start: Start position.
-        :param end: End position.
-        :param steps: Number of steps in the trajectory.
-        :return: List of positions in the trajectory.
-        """
-        x = np.linspace(start[0], end[0], steps)
-        z = np.linspace(start[1], end[1], steps)
-        return np.array([x, z]).T
+    def jacobian_square(self, joint_angles):
+        J = self.jacobian(joint_angles)
+        J = J[[0, 2], :]
+        return (J)
+    
+    def jacobian_derivative(self, joint_angles, joint_velocity):
+        a1 = self.dh_params[2]['a']
+        a2 = self.dh_params[3]['a']
+        q1 = joint_angles[0]
+        q2 = joint_angles[1]
+        q1d = joint_velocity[0]
+        q2d = joint_velocity[1]
+        J = np.zeros((6, 2))
+        J[0, 0] = -q1d*(a2*np.sin(q2 + q1) + a1*np.sin(q1)) - a2*q2d*np.sin(q2 + q1)
+        J[0, 1] = -a2*np.sin(q2 + q1)*(q2d + q1d)
+        J[2, 0] = q1d*(a2*np.cos(q2 + q1) + a1*np.cos(q1)) + a2*q2d*np.cos(q2 + q1)
+        J[2, 1] = a2*np.cos(q2 + q1)*(q2d + q1d)
+        return J
 
     def dynamics(self, joint_angles, joint_velocity):
 
@@ -125,83 +150,140 @@ class Robot:
         :return: Mass Matrix, Coriolis Matrix, Gravity Matrix.
         """
         m1 = self.inertial_properties[1]['mass']
-        m2 = self.inertial_properties[2]['mass']
+        m2 = self.inertial_properties[2]['mass'] + self.inertial_properties[3]['mass']
         I1 = self.inertial_properties[1]['inertia']
+        # need to divide urdf values by 10 (URDF izz is scaled up for simulation stability)
+        # I1zz = I1[2, 2]/10
+        I1zz = I1[2, 2]
         I2 = self.inertial_properties[2]['inertia']
+        # I2zz = I2[2, 2]/10
+        I2zz = I2[2, 2]
         a1 = self.dh_params[2]['a']
         a2 = self.dh_params[3]['a']
-        
+        q1 = joint_angles[0]
+        q2 = joint_angles[1]
+        q1d = joint_velocity[0]
+        q2d = joint_velocity[1]
+        Px1 = self.inertial_properties[1]['com'][0]
+        Py1 = self.inertial_properties[1]['com'][1]
+        Px2 = self.inertial_properties[2]['com'][0]
+        Py2 = self.inertial_properties[2]['com'][1]
+
+        # print(f"m1: {m1}, m2: {m2}")
+        # print(f"I1zz: {I1zz}, I2zz: {I2zz}")
+        # print(f"a1: {a1}, a2: {a2}")
+        # print(f"q1: {q1}, q2: {q2}, q1d: {q1d}, q2d: {q2d}")
+        # print(f"Px1: {Px1}, Py1: {Py1}, Px2: {Px2}, Py2: {Py2}")
+        g = constants.g
+
         # TODO: finalize COM and change coefficients
         M = np.zeros((2, 2))
-        M[0, 0] = I1[2, 2] + I2[2, 2] + 0.25*(a1**2)*m1 + (a1**2)*m2 + 0.25*(a2**2)*m2 + a1*a2*m2*np.cos(joint_angles[1])
-        M[1, 0] = I2[2, 2] + 0.25*(a2**2)*m2 + 0.5*a1*a2*m2*np.cos(joint_angles[1])
-        M[0, 1] = I2[2, 2] + 0.25*(a2**2)*m2 + 0.5*a1*a2*m2*np.cos(joint_angles[1])
-        M[1, 1] = I2[2, 2] + 0.25*(a2**2)*m2
+        M[0, 0] = I1zz + I2zz + Px1**2*m1 + Px2**2*m2 + Py1**2*m1 + Py2**2*m2 + a1**2*m2 + 2*Px2*a1*m2*np.cos(q2) - 2*Py2*a1*m2*np.sin(q2)
+        M[0, 1] = I2zz + Px2**2*m2 + Py2**2*m2 + Px2*a1*m2*np.cos(q2) - Py2*a1*m2*np.sin(q2)
+        M[1, 0] = I2zz + Px2**2*m2 + Py2**2*m2 + Px2*a1*m2*np.cos(q2) - Py2*a1*m2*np.sin(q2)
+        M[1, 1] = I2zz + Py2**2*m2 + Px2**2*m2
 
 
         V = np.zeros((2, 1))
-        V[0] = -0.5*a1*a2*m2*joint_velocity[1]*np.sin(joint_angles[1])*(joint_velocity[1] + 2*joint_velocity[0])
-        V[1] = 0.5*a1*a2*m2*(joint_velocity[0]**2)*np.sin(joint_angles[1])
+        V[0] = -a1*m2*q2d*(Py2*np.cos(q2) + Px2*np.sin(q2))*(q2d + 2*q1d)
+        V[1] = a1*m2*q1d**2*(Py2*np.cos(q2) + Px2*np.sin(q2))
 
         G = np.zeros((2, 1))
-        G[0] = -constants.g * m2 * (0.5*a2*np.sin(joint_angles[0] + joint_angles[1]) + 
-                                       a1*np.sin(joint_angles[0])) - 0.5*a1*constants.g*m1*np.sin(joint_angles[0])
-        G[1] = -0.5*a2*constants.g*m2*np.sin(joint_angles[0] + joint_angles[1])
+        G[0] = (- Py2*np.cos(q1 + q2) - Px2*np.sin(q1 + q2) - a1*np.sin(q1))*g*m2 + (- Py1*np.cos(q1) - Px1*np.sin(q1))*g*m1
+        G[1] = -g*m2*(np.cos(q1 + q2)*Py2 + np.sin(q1 + q2)*Px2)
 
         return M, V, G
+    
+    def draw_workspace(self, density=200, plot=False):
+        # print(self.joint_properties[1]['lower_limit'], self.joint_properties[1]['upper_limit'])
+        # print(self.joint_properties[2]['lower_limit'], self.joint_properties[2]['upper_limit'])
+        
+        j1_range = np.linspace(self.joint_properties[1]['lower_limit'], self.joint_properties[1]['upper_limit'], density)
+        j2_range = np.linspace(self.joint_properties[2]['lower_limit'], self.joint_properties[2]['upper_limit'], density)
+        x_coords = []
+        z_coords = []
+        for i in range(density):
+            for j in range(density):
+                j1 = j1_range[i]
+                j2 = j2_range[j]
+                T = self.forward_kinematics([j1, j2])
+                x = T[0, -1]
+                z = T[2, -1]
+                x_coords.append(x)
+                z_coords.append(z)
+        
+        if plot:
+            plt.figure()
+            plt.scatter(x_coords, z_coords, s=0.5, color='blue')
+            plt.title("Robot Workspace")
+            plt.xlabel("X-axis")
+            plt.ylabel("Z-axis")
+            plt.xlim(-0.55, 0.55)
+            plt.ylim(-0.55, 0.55)
+            plt.grid()
+            plt.show()
+        
 
-def plot_robot_arm(joint_angles, target_position=[0, 0]):
-    """
-    Plot the robot arm given joint angles.
-    :param joint_angles: List of joint angles.
-    """
-    x_coords = [0]
-    z_coords = [0]
-    T = np.eye(4)
+    def plot_robot_arm(self, joint_angles, target_position=[0, 0], fig=None, ax=None, label=""):
+        """
+        Plot the robot arm given joint angles.
+        :param joint_angles: List of joint angles.
+        """
+        x_coords = [0]
+        z_coords = [0]
+        T = np.eye(4)
 
-    for i, joint in enumerate(robot.dh_params):
-        if joint['type'] == 'fixed':
-            theta = joint['theta']
-        elif joint['type'] == 'revolute':
-            theta = joint_angles[i - 1] - joint['offset']
-        elif joint['type'] == 'prismatic':
-            continue
-        alpha = joint['alpha']
-        a = joint['a']
-        d = joint['d']
-        T_i = np.array([
-            [np.cos(theta), -np.sin(theta), 0, a],
-            [np.sin(theta)*np.cos(alpha), np.cos(theta)*np.cos(alpha), -np.sin(alpha), -d*np.sin(alpha)],
-            [np.sin(theta)*np.sin(alpha), np.cos(theta)*np.sin(alpha), np.cos(alpha), d*np.cos(alpha)],
-            [0, 0, 0, 1]
-        ])
-        T = np.dot(T, T_i)
-        x_coords.append(T[0, 3])
-        z_coords.append(T[2, 3])
+        for i, joint in enumerate(self.dh_params):
+            if joint['type'] == 'fixed':
+                theta = joint['theta']
+            elif joint['type'] == 'revolute':
+                theta = joint_angles[i - 1] - joint['offset']
+            elif joint['type'] == 'prismatic':
+                continue
+            alpha = joint['alpha']
+            a = joint['a']
+            d = joint['d']
+            T_i = np.array([
+                [np.cos(theta), -np.sin(theta), 0, a],
+                [np.sin(theta)*np.cos(alpha), np.cos(theta)*np.cos(alpha), -np.sin(alpha), -d*np.sin(alpha)],
+                [np.sin(theta)*np.sin(alpha), np.cos(theta)*np.sin(alpha), np.cos(alpha), d*np.cos(alpha)],
+                [0, 0, 0, 1]
+            ])
+            T = np.dot(T, T_i)
+            x_coords.append(T[0, 3])
+            z_coords.append(T[2, 3])
 
-    plt.figure()
-    plt.plot(x_coords, z_coords, marker='o', linestyle='-', color='b')
-    plt.scatter(target_position[0], target_position[1], color='r')
-    plt.title("Robot Arm Configuration")
-    plt.xlabel("X-axis")
-    plt.ylabel("Z-axis")
-    plt.xlim(-0.55, 0.55)
-    plt.ylim(-0.55, 0.55)
-    plt.grid()
-    plt.show()
+        # plt.figure()
+        ax.plot(x_coords, z_coords, marker='o', linestyle='-', color='b', label=label, alpha=0.5)
+        ax.scatter(target_position[0], target_position[1], color='r')
+        ax.set_xlabel("X-axis")
+        ax.set_ylabel("Z-axis")
+        ax.set_xlim(-0.55, 0.55)
+        ax.set_ylim(-0.55, 0.55)
+        # plt.grid()
+        # plt.show()
 
 if __name__ == "__main__":
     robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')
     # print(robot.dh_params)
 
-    pose = np.array([-0.1, -0.1])
+    pose = np.array([0.0, -0.3])
     j = robot.inverse_kinematics(pose)
 
-    print((j))
-    print(robot.jacobian([np.pi/2, 0]))
-    
-    plot_robot_arm(j[1], pose)
-    plot_robot_arm(j[0], pose)
-    robot.forward_kinematics(j[0])
-    robot.forward_kinematics(j[1])
+    # print((j))
+    # print(robot.jacobian([np.pi/2, 0]))
+    # fig, ax = plt.subplots()
+    # robot.plot_robot_arm(j[1], pose, fig, ax)
+    # robot.plot_robot_arm([0, 0], pose, fig, ax)
+    # robot.plot_robot_arm(robot.inverse_kinematics([0.0, -0.115])[1], pose, fig, ax)
+    # plt.grid()
+    # plt.show()
+    # robot.plot_robot_arm(j[0], pose)
+    print(np.round(robot.forward_kinematics([0.46, -2.340]), 4))
+    print(np.round(robot.forward_kinematics2([0.46, -2.340]), 4))
+    # robot.forward_kinematics(j[1])
+    # robot.draw_workspace(plot=True, density=200)
+    # T = robot.forward_kinematics([-2.80, 2.62])
+    # print(T)
+    # print(robot.inverse_kinematics([T[0, 3], T[2, 3]]))
     # print(robot.trajectory([0, 0], [0, -0.01], steps=10))

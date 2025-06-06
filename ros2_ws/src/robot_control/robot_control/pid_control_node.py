@@ -57,11 +57,12 @@ class robot_control_node(Node):
             if self.jump:
                 if self.state != states['CROUCH']:
                     self.state = states['CROUCH']
-                    joint_angles = self.robot.inverse_kinematics(np.array([0.0, -0.05]))
+                    joint_angles = self.robot.inverse_kinematics(np.array([0.002, -0.115]))
+                    # print(self.joint_angles)
                     self.joint_angles_d = joint_angles[0]
                 else:
                     print(np.max(np.abs(self.joint_angles - self.joint_angles_d)))
-                    if np.max(np.abs(self.joint_angles - self.joint_angles_d)) < 0.1:
+                    if np.max(np.abs(self.joint_angles - self.joint_angles_d)) < 0.1 and self.on_ground:
                         self.state = states['JUMP']
                         self.joint_angles_d = np.array([0, 0])
                         self.jump = False
@@ -71,11 +72,11 @@ class robot_control_node(Node):
         else:
             if (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9) > 0.01 and self.state == states['JUMP']:
                 self.state = states['IN_AIR']
-                joint_angles = self.robot.inverse_kinematics(np.array([0.0, -0.05]))
+                joint_angles = self.robot.inverse_kinematics(np.array([0.002, -0.115]))
                 self.joint_angles_d = joint_angles[0]
                 self.on_ground = False
 
-        print("State: ", state_names[self.state])
+        # print("State: ", state_names[self.state])
         hip_msg = Float64()
         knee_msg = Float64()
 

@@ -30,6 +30,11 @@
       name="gz::sim::systems::Contact">
     </plugin>
 
+    <plugin
+      filename="gz-sim-forcetorque-system"
+      name="gz::sim::systems::ForceTorque">
+    </plugin>
+
     <model name="ground_plane">
       <static>true</static>
       <link name="ground">
@@ -57,7 +62,7 @@
             <friction>
               <ode>
                 <mu>0.1</mu>
-                <mu2>0.0</mu2>
+                <mu2>0.01</mu2>
               </ode>
             </friction>
           </surface>
@@ -76,7 +81,7 @@
       <shadows>false</shadows>
     </scene>
 
-    <physics type="ode">
+    <physics type="dart">
       <real_time_update_rate>1000.0</real_time_update_rate>
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>

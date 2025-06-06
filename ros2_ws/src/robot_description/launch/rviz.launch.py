@@ -22,7 +22,7 @@ def generate_launch_description():
     
     # Create a robot_state_publisher node
     # params = {'robot_description': robot_description_config.toxml(), 'use_sim_time': use_sim_time}
-    robot_description_config = Command(['xacro ', xacro_file, ' sim_mode:=', use_sim_time])
+    robot_description_config = Command(['xacro ', xacro_file, ' use_sim_time:=', use_sim_time])
     params = {'robot_description': robot_description_config, 'use_sim_time': use_sim_time}
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
@@ -54,7 +54,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'use_sim_time',
-            default_value='false',
+            default_value='true',
             description='Use sim time if true'),
 
         node_robot_state_publisher,

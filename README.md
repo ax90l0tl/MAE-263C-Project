@@ -6,8 +6,10 @@ This repo contains code for simulating a 2DOF jumping leg with various controlle
 All the ROS2 and simulation has been tested on:
 
 * Ubuntu 24.04
-* ROS2 Jazzy
+* [ROS2 Jazzy](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html)
 * Gazebo Harmonic
+
+**Tested on [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install)
 
 ## Other Packages
 You will also need these other Packages (rosdep might not work)
@@ -16,25 +18,26 @@ sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-r
 ```
 
 ## Initial setup
-1. Make `envs` folder in home dir (You can make this wherever if you're familiar with Linux. This is just what I base the next couple of commands on)
+1. Clone this repo
+2. Make `envs` folder in home dir (You can make this wherever if you're familiar with Linux, but you will have to change the paths in the later commands)
    ```
-   mkdir envs
+   cd && mkdir envs && cd envs
    ```
-2. Make python venv
+3. Make python venv
    ```
    python3 -m virtualenv ros2
    ```
-3. Do this so that your venv changes your PYTHONPATH var ([ROS2 still has issues with Python packages in venvs](https://github.com/ros2/ros2/issues/1094))   
+4. Do this so that your venv changes your PYTHONPATH var ([ROS2 still has issues with Python packages in venvs](https://github.com/ros2/ros2/issues/1094))   
    ```
    echo 'export PYTHONPATH=~/envs/ros2/lib/python3.12/site-packages:$PYTHONPATH' >> ~/envs/ros2/bin/activate
    ```
 5. Activate environment
    ```
-   source ~env/ros2/bin/activate
+   source ~/envs/ros2/bin/activate
    ```
-6. Install Python packages
+6. Go to where you cloned this repo and install Python packages
    ```
-   pip install -r requirements.txt
+   cd && cd ~/MAE-263C-Project && pip install -r requirements.txt
    ```
 7. Source ros
    ```
@@ -49,37 +52,45 @@ sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-r
    sudo rosdep init
    rosdep update
    ```
-10. Run rosdep
+10. Go to `ros2_ws`
+    ```
+    cd ~/MAE-263C-Project/ros2 ws
+    ```
+11. Run rosdep
    ```
    rosdep install --from-paths src -y --ignore-src
    ```
 
 
 ## Instructions
-1. Navigate to `/ros2_ws` and run:
+1. Navigate to `/ros2_ws` inside `MAE-263C-Project` and run:
     ``` 
     colcon build
     ```
-2. In one terminal run:
+2. Source your files:
    ```
-   ros2 launch robot_description sim.launch.py
+   source install/setup.bash
+   ```
+3. In one terminal run:
+   ```
+   ros2 launch robot_description sim.launch.py torque_control:=true
    ```
    to launch the simulation
-3. In another terminal run:
+4. In another terminal run:
    ```
-
+   ros2 run robot_control active_compliance_control_node
    ```
 
 ## Helpful Commands
-* I like to make aliases in my `~\.bashrc` for all the ROS2 sourcing commands
+* I like to make aliases in my `~\.bashrc` for all the ROS2 sourcing commands (Double check all paths). You can copy-paste this into the terminal.
     ```
-    alias src-ros2='source /opt/ros/jazzy/setup.bash && source /usr/share/colcon_cd/function/colcon_cd.sh && export _colcon_cd_root=/opt/ros/jazzy/ && source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash && export QT_QPA_PLATFORMTHEME=qt5ct && export GZ_VERSION=harmonic && cd ~/MAE-263C-Project/ros2_ws && source ~/envs/ros2/bin/activate && source install/setup.bash'
+    echo "alias src-ros2='source /opt/ros/jazzy/setup.bash && source /usr/share/colcon_cd/function/colcon_cd.sh && export _colcon_cd_root=/opt/ros/jazzy/ && source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash && export QT_QPA_PLATFORMTHEME=qt5ct && export GZ_VERSION=harmonic && cd ~/MAE-263C-Project/ros2_ws && source ~/envs/ros2/bin/activate && source install/setup.bash'" >> ~/.bashrc
     ```
     Now I just need to type:
     ```
     src-ros2
     ```
-** Paths assume you clones into your home directory
+** Paths assume you clone into your home directory
 
 * The command:
     ```
@@ -87,7 +98,7 @@ sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-r
     ```
     symbolically links your files. This means any changes to files that don't need to be compiled (Python, XML, YAML, URDF, etc) can be changed without colcon building again. It sometimes causes issues but you can just delete the `/install`, `/build`, and `/log` folders and rebuild.
 
-* Export python dependencies
+* Export python dependencies if you need a Python package not already listed
   ```
    pip freeze > ../requirements.txt --local
  ```
