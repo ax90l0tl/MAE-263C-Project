@@ -34,6 +34,8 @@ for i = 1:N
 
     % Controller Torque
     [tau,F] = controller_aerial(t(i),X(:,i),p);
+    F
+    tau
     % Torque Saturation (INCOMPLETE) 
 
     % Data Logging of Controller
@@ -46,7 +48,7 @@ for i = 1:N
     
     % Dynamic Equations
     ddq = M \ (B * tau + J14' * f_app + friction - C*dq - G );
-    dXdt(:,i) = [dq(:,i); ddq(:,i)];
+    dXdt(:,i) = [dq(:i); ddq];
 end
 
 end
