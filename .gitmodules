@@ -1,0 +1,3 @@
+[submodule "Leg_Test/PyBEAR"]
+	path = Leg_Test/PyBEAR
+	url = https://github.com/Westwood-Robotics/PyBEAR.git
