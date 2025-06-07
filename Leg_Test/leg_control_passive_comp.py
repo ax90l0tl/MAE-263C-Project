@@ -1,6 +1,6 @@
 from leg_manager import legManager
 from math import pi
-from Leg_Test.controllers.pd_grav_comp_controller import *
+from controllers.pd_grav_comp_controller import *
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -18,8 +18,8 @@ Ts = 0.001  # sampling rate 500 Hz
 leg  = legManager(bear_port=bear_port, sensor_port=sensor_port)
 controller = pdGravCompController()  # Leave blank if using the default values
 
-input("Press Enter to start passive compenation demo.",
-      "Use 'g' and 'f' to toggle gravity and friction compensation. ",
+input("Press Enter to start passive compenation demo." +
+      "Use 'g' and 'f' to toggle gravity and friction compensation. " +
       "Press Esc anytime to exit.")
 leg.enable_torque(1)
 
@@ -34,6 +34,8 @@ start_time = time.time()
 while True:
     # Get feedback
     iq, q_rad, qd_rad_s = leg.get_feedback()
+    # print(f"iq: [{iq[0]:.6f}, {iq[1]:.6f}], q_rad: [{q_rad[0]:.6f}, {q_rad[1]:.6f}], qd_rad_s: [{qd_rad_s[0]:.6f}, {qd_rad_s[1]:.6f}]")
+    # print(f"q_rad: [{q_rad[0]:.6f}, {q_rad[1]:.6f}]")
 
     # Check for key press
     if msvcrt.kbhit():
@@ -54,8 +56,8 @@ while True:
     # print(phase)
     u_g = controller.calc_grav_comp_torque(q_rad, phase)
     u_f = controller.calc_friction_torque(qd_rad_s)  # Add friction compensation torque
-    # u_g_formatted = np.array2string(u_g, formatter={'float_kind': lambda x: f"{x: .6f}"})
-    # u_f_formatted = np.array2string(u_f, formatter={'float_kind': lambda x: f"{x: .6f}"})
+    u_g_formatted = np.array2string(u_g, formatter={'float_kind': lambda x: f"{x: .6f}"})
+    u_f_formatted = np.array2string(u_f, formatter={'float_kind': lambda x: f"{x: .6f}"})
     # print(f"Compensation torque: friction: {u_f_formatted}, gravity: {u_g_formatted}")
 
     # Command control actions

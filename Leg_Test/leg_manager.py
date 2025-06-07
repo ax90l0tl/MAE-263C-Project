@@ -20,7 +20,7 @@ class legManager:
 
         self.bear = Manager.BEAR(port=self.bear_port, baudrate=self.baudrate)
         self.bear_ids = self._search_bear() 
-        self._conigure_bear_motors()
+        self._configure_bear_motors()
         self.imu = self._init_imu(self.sensor_port, self.gpio_pin)  # GPIO pin 1 for foot sensor
 
     def _init_imu(self, COM_PORT, GPIO_PIN):
@@ -81,12 +81,13 @@ class legManager:
         """
         results = self.bear.get_status((1, 'present_iq', 'present_velocity', 'present_position'),
                                        (2, 'present_iq', 'present_velocity', 'present_position'))
+        # print(f"Feedback from BEAR motors: {results}")
         iq1 = results[0][0][0]
-        iq2 = results[0][0][1]
-        q1_rad = results[1][0][0]
-        q1d_rad_s = results[1][0][1]
-        q2_rad = results[2][0][0]
-        q2d_rad_s = results[2][0][1]
+        iq2 = results[1][0][0]
+        q1d_rad_s = results[0][0][1]
+        q2d_rad_s = results[1][0][1]
+        q1_rad = results[0][0][2]
+        q2_rad = results[1][0][2]
         return np.array([iq1, iq2]), np.array([q1_rad, q2_rad]), np.array([q1d_rad_s, q2d_rad_s])
     
     def torque2iq(self, u):
