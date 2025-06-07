@@ -1,6 +1,6 @@
 from leg_manager import legManager
 from math import pi
-from Leg_Test.controllers.pd_grav_comp_controller import *
+from controllers.pd_grav_comp_controller import *
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -25,22 +25,22 @@ num_samples = 2000
 # Desired positions in operation space
 P_DES = {
     'IDLE': [0, -0.25],
-    'PREP': [0, -0.20],
-    'JUMP': [0, -0.30],
-    'LAND': [0, -0.20],
+    'PREP': [0, -0.18],
+    'JUMP': [0, -0.32],
+    'LAND': [0, -0.18],
 }
 
 # Gains
 KP = {
     'IDLE': np.diag([3, 4]),
     'PREP': np.diag([3, 4]),
-    'JUMP': np.diag([8, 12]),
+    'JUMP': np.diag([20, 25]),
     'LAND': np.diag([3, 4]),
     }
 KD = {
     'IDLE': np.diag([0.2, 0.2]),
     'PREP': np.diag([0.2, 0.2]),
-    'JUMP': np.diag([0.5, 0.2]),
+    'JUMP': np.diag([0.8, 0.8]),
     'LAND': np.diag([0.2, 0.2]),
 }
 
@@ -86,11 +86,12 @@ while True:
                 current_state = 'PREP'
                 logger.info("State changed to PREP")
             elif current_state == 'PREP':
-                if np.allclose(q_des, q_rad, atol = 0.02):
+                if np.allclose(q_des, q_rad, atol = 0.2):
                     current_state = 'JUMP'
                     logger.info("State changed to JUMP") 
                 else:
                     logger.warning("PREP pose not yet reached.")
+                    print(f"Current pose: {np.rad2deg(q_rad)}, Desired pose: {np.rad2deg(q_des)}")
             q_des = controller.calculate_IK(P_DES[current_state])
         elif key == b'\x1b':  # Esc key
             logger.info("Esc pressed. Exiting control loop...")

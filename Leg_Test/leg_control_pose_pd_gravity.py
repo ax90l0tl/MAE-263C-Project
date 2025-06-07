@@ -1,6 +1,6 @@
 from leg_manager import legManager
 from math import pi
-from Leg_Test.controllers.pd_grav_comp_controller import *
+from controllers.pd_grav_comp_controller import *
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
