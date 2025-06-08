@@ -30,7 +30,7 @@ def compute_impedence_output(y, q, qd, robot):
     # Force of gravity on base link treated as normal force applied to end-effector
     F = J.T @ T_e @ np.array([[0], [0], [robot.inertial_properties[0]['mass'] * constants.g], [0], [0], [0]])
     # print("g: ", G, F)
-    return B @ y + V
+    return B @ y + V + F + G
 
 if __name__ == "__main__":
     robot = Robot(package_name='robot_description', urdf_file='robot.urdf.xacro')

@@ -10,9 +10,10 @@ dt = 1 / f # seconds
 x_d_idle = np.array([0.0, -0.3])
 xd_d_idle = np.zeros(2)
 xdd_d_idle = np.zeros(2)
+
 # Crouch mode
 t = np.array([0.0, 1.0])  # seconds
-x_d_crouch = np.array([0.0, -0.15])
+x_d_crouch = np.array([-0.1, -0.15])
 (t_idle_to_crouch, 
  x_d_idle_to_crouch_traj, 
  xd_d_idle_to_crouch_traj, 
@@ -22,9 +23,10 @@ x_d_crouch = np.array([0.0, -0.15])
     np.zeros((2, 2)), 
     f=f
 )
+
 # Jump mode
 x_d_jump = np.array([0.0, -0.3])
-t = np.array([0.0, 0.1])
+t = np.array([0.0, 0.01])
 (t_crouch_to_jump, 
  x_d_crouch_to_jump_traj, 
  xd_d_crouch_to_jump_traj, 
@@ -34,16 +36,16 @@ t = np.array([0.0, 0.1])
     np.zeros((2, 2)), 
     f=f
 )
+
 # # In-air mode
 # x_d_in_air_traj = np.array([])
 # xd_d_in_air_traj = np.array([])
 # xdd_d_in_air_traj = np.array([])
 # Landing mode
-x_d_landing_traj = np.array([])
-xd_d_landing_traj = np.array([])
-xdd_d_landing_traj = np.array([])
+# x_d_landing_traj = np.array([])
+# xd_d_landing_traj = np.array([])
+# xdd_d_landing_traj = np.array([])
 
-x_d_jump = np.array([0.0, -0.2])
 t = np.array([0.0, 1.0])
 
 x_d_landing_pts = np.vstack((x_d_jump, x_d_crouch))
@@ -58,28 +60,29 @@ xdd_d_landing_pts = np.array([[0.0, 0], [0.0, 0]])
     xdd_d_landing_pts, 
     f=f)
 
-import matplotlib.pyplot as plt
-plt.figure()
-plt.plot(t_crouch_to_jump, x_d_crouch_to_jump_traj[:, 0], label='z position')
-# plt.scatter(t, x_d_landing_pts[:, 1])
-plt.xlabel('Time (s)')
-plt.ylabel('Position (m)')
-plt.legend()
-plt.grid()
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    plt.figure()
+    plt.plot(t_crouch_to_jump, x_d_crouch_to_jump_traj[:, 0], label='z position')
+    plt.scatter(t, x_d_landing_pts[:, 1])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Position (m)')
+    plt.legend()
+    plt.grid()
 
-# plt.figure()
-# plt.plot(t_landing, xd_d_landing_traj[:, 1], label='z velocity')
-# plt.scatter(t, xd_d_landing_pts[:, 1])
-# plt.xlabel('Time (s)')
-# plt.ylabel('Velocity (m/s)')
-# plt.legend()
-# plt.grid()
+    plt.figure()
+    plt.plot(t_landing, xd_d_landing_traj[:, 1], label='z velocity')
+    plt.scatter(t, xd_d_landing_pts[:, 1])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Velocity (m/s)')
+    plt.legend()
+    plt.grid()
 
-# plt.figure()
-# plt.plot(t_landing, xdd_d_landing_traj[:, 1], label='z acceleration')
-# plt.scatter(t, xdd_d_landing_pts[:, 1])
-# plt.xlabel('Time (s)')
-# plt.ylabel('Acceleration (m/s^2)')
-# plt.legend()
-# plt.grid()
-plt.show()
+    plt.figure()
+    plt.plot(t_landing, xdd_d_landing_traj[:, 1], label='z acceleration')
+    plt.scatter(t, xdd_d_landing_pts[:, 1])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Acceleration (m/s^2)')
+    plt.legend()
+    plt.grid()
+    plt.show()
