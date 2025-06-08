@@ -14,11 +14,14 @@ All the ROS2 and simulation has been tested on:
 ## Other Packages
 You will also need these other Packages (rosdep might not work)
 ```
-sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-ros-gz ros-jazzy-rqt qt5ct python3-virtualenv python3-colcon-common-extensions
+sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-ros-gz ros-jazzy-rqt* qt5ct python3-virtualenv python3-colcon-common-extensions
 ```
 
 ## Initial setup
 1. Clone this repo
+   ```
+   git clone --recurse-submodules https://github.com/ax90l0tl/MAE-263C-Project.git
+   ```
 2. Make `envs` folder in home dir (You can make this wherever if you're familiar with Linux, but you will have to change the paths in the later commands)
    ```
    cd && mkdir envs && cd envs
@@ -39,27 +42,33 @@ sudo apt-get install ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-r
    ```
    cd && cd ~/MAE-263C-Project && pip install -r requirements.txt
    ```
-7. Source ros
+7. Install Pybear SDK
+   '''
+   cd Leg_Test/Pybear && pip install .
+   '''
+8. Source ros
    ```
    source /opt/ros/jazzy/setup.bash
    ```
-8. Install rosdep
+9. Install rosdep
    ```
    sudo apt-get install python3-rosdep
    ```
-9. Initialize rosdep
+10. Initialize rosdep
    ```
    sudo rosdep init
    rosdep update
    ```
-10. Go to `ros2_ws`
+11. Go to `ros2_ws`
     ```
-    cd ~/MAE-263C-Project/ros2 ws
+    cd ~/MAE-263C-Project/ros2_ws
     ```
-11. Run rosdep
+12. Run rosdep
    ```
    rosdep install --from-paths src -y --ignore-src
    ```
+13. Download the correct MSCL release [here](https://github.com/LORD-MicroStrain/MSCL/releases)
+14. 
 
 
 ## Instructions
