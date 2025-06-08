@@ -37,7 +37,7 @@ class impedence_control_node(Node):
                                  depth=1,
                                  durability=QoSDurabilityPolicy.VOLATILE)
         
-        self.contact_sub = self.create_subscription(Contacts, '/contact', self.contacts_callback, qos_profile=qos_profile)
+        self.contact_sub = self.create_subscription(Contacts, '/contact', self.contacts_callback, 1)
         self.joint_sub = self.create_subscription(JointState, '/joint_states', self.joint_callback, qos_profile=qos_profile)
         self.hip_FT_sub = self.create_subscription(WrenchStamped, '/hip_FT', self.hip_callback, qos_profile=qos_profile)
         self.knee_FT_sub = self.create_subscription(WrenchStamped, '/knee_FT', self.knee_callback, qos_profile=qos_profile)
@@ -51,6 +51,12 @@ class impedence_control_node(Node):
         self.declare_parameter('Kp', [1000.0, 1000.0])
         self.declare_parameter('Kd', [100.0, 100.0])
         self.declare_parameter('Md', [1.0, 1.0])
+        self.declare_parameter('PID.Kp', [100.0, 100.0])
+        self.declare_parameter('PID.Kd', [1.0, 1.0])
+        self.declare_parameter('PID.Ki', [1.0, 1.0])
+        self.declare_parameter('Landing.Kp', [5000.0, 1000.0])
+        self.declare_parameter('Landing.Kd', [200.0, 100.0])
+        self.declare_parameter('Landing.Md', [1.0, 2.0])
         self.add_on_set_parameters_callback(self.parameter_callback)
 
         timer_period = 0.005  # seconds
@@ -75,6 +81,12 @@ class impedence_control_node(Node):
         self.Kp = np.diag(self.get_parameter('Kp').get_parameter_value().double_array_value)
         self.Kd = np.diag(self.get_parameter('Kd').get_parameter_value().double_array_value)
         self.Md = np.diag(self.get_parameter('Md').get_parameter_value().double_array_value)
+        self.Kp_pid = np.diag(self.get_parameter('PID.Kp').get_parameter_value().double_array_value)
+        self.Kd_pid = np.diag(self.get_parameter('PID.Kd').get_parameter_value().double_array_value)
+        self.Ki_pid = np.diag(self.get_parameter('PID.Ki').get_parameter_value().double_array_value)
+        self.Kp_landing = np.diag(self.get_parameter('Landing.Kp').get_parameter_value().double_array_value)
+        self.Kd_landing = np.diag(self.get_parameter('Landing.Kd').get_parameter_value().double_array_value)
+        self.Md_landing = np.diag(self.get_parameter('Landing.Md').get_parameter_value().double_array_value)
         self.x_d_traj_points = np.zeros(2)
         self.xd_d_traj_points = np.zeros(2)
         self.xdd_d_traj_points = np.zeros(2)
@@ -90,10 +102,7 @@ class impedence_control_node(Node):
         # Use PID to get to starting position when the node starts
         current_time = self.get_clock().now().nanoseconds
         if (current_time - self.start_time)/(1e9) < 5.0 or (current_time - self.reset_time)/(1e9) < 5.0 or (current_time - self.last_sim_time)/(1e9) > 5.0:
-            Kp=np.diag([1.0, 1.0])
-            Kd=np.diag([0.1, 0.1])
-            Ki=np.diag([0.0001, 0.0001])
-            self.u, self.error = pid_control(self.q, np.array([-1.5, 2.0]), self.qd, Kp, Kd, Ki, error_prev=self.error, dt=0.005)
+            self.u, self.error = pid_control(self.q, np.array([-1.5, 2.0]), self.qd, self.Kp_pid, self.Kd_pid, self.Ki_pid, error_prev=self.error, dt=0.005)
         else:
             if self.jump:
                 if self.state == states['IDLE']:
@@ -127,19 +136,20 @@ class impedence_control_node(Node):
                         self.xd_d_traj_points = self.xd_d_traj_points[1:]
                         self.xdd_d_traj_points = self.xdd_d_traj_points[1:]
                     else:   
-                        # self.jump = False
-                        print('finished jump')
-                        self.state = states['IN_AIR']
-                        self.landing_time = self.get_clock().now().nanoseconds
+                        if (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9) > 0.002:
+                            print("on_ground: ", (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9))
+                            self.state = states['IN_AIR']
+                            self.landing_time = self.get_clock().now().nanoseconds
+                        else:
+                            self.state = states['IDLE']
+                            self.jump = False
 
                 elif self.state == states['IN_AIR']:
-                    if (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9) > 0.005:
-                        print("on_ground: ", (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9))
+                    # if (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9) > 0.005:
+                        # print("on_ground: ", (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9))
                     self.x_d = x_d_idle
-                    Md = np.diag([1.0, 2.0])
-                    Kp = np.diag([10.0, 5.0])
-                    Kd = np.diag([2.0, 1.0])
-                    y = compute_y(x_d_idle, xd_d_idle, xdd_d_idle, self.x, self.q, self.qd, self.robot, Md, Kp, Kd)
+                    y = compute_y(x_d_idle, xd_d_idle, xdd_d_idle, self.x, self.q, self.qd, self.robot,
+                                   self.Md_landing, self.Kp_landing, self.Kd_landing)
                     self.u = compute_impedence_output(y, self.q, self.qd, self.robot)
                     if (self.get_clock().now().nanoseconds - self.landing_time)/(1e9) > 2.0:
                         self.state = states['IDLE']
@@ -150,7 +160,7 @@ class impedence_control_node(Node):
             else:
                 # Idle state
                 self.state = states['IDLE']
-                print(self.robot.inverse_kinematics(self.x_d))
+                # print(self.robot.inverse_kinematics(self.x_d))
                 self.x_d = x_d_idle
                 y = compute_y(x_d_idle, xd_d_idle, xdd_d_idle, self.x, self.q, self.qd, self.robot, self.Md, self.Kp, self.Kd)
                 self.u = compute_impedence_output(y, self.q, self.qd, self.robot)

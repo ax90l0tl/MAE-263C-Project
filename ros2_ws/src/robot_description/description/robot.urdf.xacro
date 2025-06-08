@@ -14,8 +14,6 @@
     Moment of inertia cross terms are zero for stability
     Moment of inertia of base_link not real because it doesn't rotate (helps sim stability)
     Moment of inertia xx and yy terms for hip, knee, and foot are set to 0.1 for stability
-    Moment of inertia zz terms for hip, knee, and foot are multiplied by 10 for stability (if pulling
-    values from URDF, divide by 10 to get real value) 
     -->
     <joint name="slider_joint" type="prismatic">
         <parent link="world" />
@@ -44,7 +42,7 @@
         </visual>
         <inertial>
             <origin xyz="0.0 0 0" rpy="0 0 0" />
-            <mass value="0.39" />
+            <mass value="0.67115" />
             <inertia ixx="0.1" ixy="0.0" ixz="0.0"
                 iyy="0.1" iyz="0.0" izz="0.1" />
         </inertial>
@@ -84,10 +82,10 @@
             </geometry>
         </collision>
         <inertial>
-            <origin xyz="0.016172 0.057426 0.010825" rpy="0 0 0" />
-            <mass value="0.5" />
+            <origin xyz="0.014130 0.059212 0.010598" rpy="0 0 0" />
+            <mass value="0.482069" />
             <inertia ixx="0.01" ixy=" 0.0" ixz="0.0"
-                iyy="0.01" iyz="0.0" izz="0.01275" />
+                iyy="0.01" iyz="0.0" izz="0.001186" />
         </inertial>
     </link>
 
@@ -125,10 +123,10 @@
             </geometry>
         </collision>
         <inertial>
-            <origin xyz="0.119035 -0.021572 0.000043" rpy="0 0 0" />
-            <mass value="0.055566" />
+            <origin xyz="0.117055 -0.019215 -0.000018" rpy="0 0 0" />
+            <mass value="0.047151" />
             <inertia ixx="0.01" ixy="0.0" ixz="0.0"
-                iyy="0.01" iyz="0.0" izz="0.00407" />
+                iyy="0.01" iyz="0.0" izz="0.000464" />
         </inertial>
     </link>
 

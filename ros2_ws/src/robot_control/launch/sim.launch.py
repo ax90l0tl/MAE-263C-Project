@@ -14,23 +14,17 @@ def generate_launch_description():
     # Check if we're told to use sim time
     use_sim_time = LaunchConfiguration('use_sim_time')
 
-    # Process the URDF file
-    # pkg_path = os.path.join(get_package_share_directory('robot_description'))
+    config = os.path.join(get_package_share_directory('robot_control'), 'config', 'sim_gains.yaml')
     
     # Need joint state publisher for continuous and revolute joints
     controller = Node(
         package='robot_control',
         executable='impedence_control_node',
         output='screen',
-        parameters=[{'use_sim_time': use_sim_time}],
+        parameters=[config],
     )
 
     # Launch!
     return LaunchDescription([
-        DeclareLaunchArgument(
-            'use_sim_time',
-            default_value='true',
-            description='Use sim time if true'),
-        
         controller,
     ])
