@@ -11,8 +11,8 @@ from datetime import datetime
 
 
 # User-modifiable parameters
-bear_port = 'COM3'
-sensor_port = 'COM20'
+bear_port = '/dev/ttyUSB0'
+sensor_port = '/dev/ttyACM0'
 p_des_1 = [0, -0.20]
 p_des_2 = [0, -0.30]
 max_duration_s = 5  # cap recording time

@@ -153,11 +153,11 @@ class Robot:
         m2 = self.inertial_properties[2]['mass'] + self.inertial_properties[3]['mass']
         I1 = self.inertial_properties[1]['inertia']
         # need to divide urdf values by 10 (URDF izz is scaled up for simulation stability)
-        # I1zz = I1[2, 2]/10
-        I1zz = I1[2, 2]
+        I1zz = I1[2, 2]/10
+        # I1zz = I1[2, 2]
         I2 = self.inertial_properties[2]['inertia']
-        # I2zz = I2[2, 2]/10
-        I2zz = I2[2, 2]
+        I2zz = I2[2, 2]/10
+        # I2zz = I2[2, 2]
         a1 = self.dh_params[2]['a']
         a2 = self.dh_params[3]['a']
         q1 = joint_angles[0]
@@ -270,7 +270,7 @@ if __name__ == "__main__":
     pose = np.array([0.0, -0.3])
     j = robot.inverse_kinematics(pose)
 
-    # print((j))
+    print((j))
     # print(robot.jacobian([np.pi/2, 0]))
     # fig, ax = plt.subplots()
     # robot.plot_robot_arm(j[1], pose, fig, ax)
@@ -279,8 +279,8 @@ if __name__ == "__main__":
     # plt.grid()
     # plt.show()
     # robot.plot_robot_arm(j[0], pose)
-    print(np.round(robot.forward_kinematics([0.46, -2.340]), 4))
-    print(np.round(robot.forward_kinematics2([0.46, -2.340]), 4))
+    # print(np.round(robot.forward_kinematics([0.46, -2.340]), 4))
+    # print(np.round(robot.forward_kinematics2([0.46, -2.340]), 4))
     # robot.forward_kinematics(j[1])
     # robot.draw_workspace(plot=True, density=200)
     # T = robot.forward_kinematics([-2.80, 2.62])

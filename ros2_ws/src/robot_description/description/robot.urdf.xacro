@@ -3,7 +3,7 @@
     <xacro:arg name="use_sim_time" default="false" />
     <xacro:arg name="torque_control" default="false" />
     <xacro:arg name="position_control" default="false" />
-    <xacro:property name="L1_length" default="0.145" />
+    <xacro:property name="L1_length" default="0.125" />
     <xacro:property name="L2_length" default="0.215" />
     <xacro:property name="max_torque" default="20.1" />
     <link name="world">
@@ -96,7 +96,7 @@
         <child link="knee_link" />
         <origin xyz="${L1_length} 0 0.0277" rpy="0 0 0" />
         <axis xyz="0 0 1" />
-        <limit effort="${max_torque}" lower="-2.34" upper="2.62" velocity="31.67" />
+        <limit effort="${max_torque}" lower="0.3" upper="2.62" velocity="31.67" />
         <dynamics damping="0.01" friction="0.01" />
     </joint>
 
