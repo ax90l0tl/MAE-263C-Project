@@ -26,6 +26,7 @@ setup(
             'pid_control_node = robot_control.pid_control_node:main',
             'active_compliance_control_node = robot_control.active_compliance_control_node:main',
             'impedence_control_node = robot_control.impedence_control_node:main',
+            'hardware_node = robot_control.hardware_node:main',
         ],
     },
 )

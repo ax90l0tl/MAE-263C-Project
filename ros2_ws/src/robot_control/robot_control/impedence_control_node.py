@@ -48,7 +48,7 @@ class impedence_control_node(Node):
         self.desired_pose_pub = self.create_publisher(PoseStamped, '/x_d', 10)
         self.pose_pub = self.create_publisher(PoseStamped, '/x', 10)
 
-        self.declare_parameter('Kp', [5000.0, 5000.0])
+        self.declare_parameter('Kp', [1000.0, 1000.0])
         self.declare_parameter('Kd', [100.0, 100.0])
         self.declare_parameter('Md', [1.0, 1.0])
         self.add_on_set_parameters_callback(self.parameter_callback)
@@ -89,11 +89,11 @@ class impedence_control_node(Node):
     def timer_callback(self):
         # Use PID to get to starting position when the node starts
         current_time = self.get_clock().now().nanoseconds
-        if (current_time - self.start_time)/(1e9) < 3.0 or (current_time - self.reset_time)/(1e9) < 3.0 or (current_time - self.last_sim_time)/(1e9) > 2.0:
-            Kp=np.diag([100.0, 100.0])
-            Kd=np.diag([1.0, 1.0])
-            Ki=np.diag([0.001, 0.001])
-            self.u, self.error = pid_control(self.q, np.array([-1.5, 2.62]), self.qd, Kp, Kd, Ki, error_prev=self.error, dt=0.005)
+        if (current_time - self.start_time)/(1e9) < 5.0 or (current_time - self.reset_time)/(1e9) < 5.0 or (current_time - self.last_sim_time)/(1e9) > 5.0:
+            Kp=np.diag([1.0, 1.0])
+            Kd=np.diag([0.1, 0.1])
+            Ki=np.diag([0.0001, 0.0001])
+            self.u, self.error = pid_control(self.q, np.array([-1.5, 2.0]), self.qd, Kp, Kd, Ki, error_prev=self.error, dt=0.005)
         else:
             if self.jump:
                 if self.state == states['IDLE']:
@@ -112,7 +112,7 @@ class impedence_control_node(Node):
                         self.xdd_d_traj_points = self.xdd_d_traj_points[1:]
                     else:
                         print("max_error: ", np.max(np.abs(self.x - self.x_d_traj_points)))
-                        if np.max(np.abs(self.x - self.x_d_traj_points)) < 0.01:
+                        if np.max(np.abs(self.x - self.x_d_traj_points)) < 0.05:
                             self.state = states['JUMP']
                             self.x_d_traj_points = x_d_crouch_to_jump_traj.copy()
                             self.xd_d_traj_points = xd_d_crouch_to_jump_traj.copy()
@@ -137,8 +137,8 @@ class impedence_control_node(Node):
                         print("on_ground: ", (self.get_clock().now().nanoseconds - self.on_ground_time)/(1e9))
                     self.x_d = x_d_idle
                     Md = np.diag([1.0, 2.0])
-                    Kp = np.diag([5000.0, 1000.0])
-                    Kd = np.diag([200.0, 100.0])
+                    Kp = np.diag([10.0, 5.0])
+                    Kd = np.diag([2.0, 1.0])
                     y = compute_y(x_d_idle, xd_d_idle, xdd_d_idle, self.x, self.q, self.qd, self.robot, Md, Kp, Kd)
                     self.u = compute_impedence_output(y, self.q, self.qd, self.robot)
                     if (self.get_clock().now().nanoseconds - self.landing_time)/(1e9) > 2.0:
@@ -150,6 +150,7 @@ class impedence_control_node(Node):
             else:
                 # Idle state
                 self.state = states['IDLE']
+                print(self.robot.inverse_kinematics(self.x_d))
                 self.x_d = x_d_idle
                 y = compute_y(x_d_idle, xd_d_idle, xdd_d_idle, self.x, self.q, self.qd, self.robot, self.Md, self.Kp, self.Kd)
                 self.u = compute_impedence_output(y, self.q, self.qd, self.robot)
