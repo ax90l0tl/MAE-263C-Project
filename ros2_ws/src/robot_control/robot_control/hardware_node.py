@@ -43,7 +43,6 @@ class hardware_node(Node):
     def timer_callback(self):
         self.leg_manager.move_motors(self.u)
         iq, q, qd = self.leg_manager.get_feedback()
-        q[1] += np.deg2rad(21.75) # knee offset due to linkage
         print(self.u, q)
         joint_state_msg = JointState()
         joint_state_msg.header.stamp = self.get_clock().now().to_msg()
