@@ -1,6 +1,6 @@
 from pybear import Manager
 from pybear.CONTROL_TABLE import *
-from MSCL import mscl
+import mscl
 import numpy as np
 
 '''
@@ -89,6 +89,9 @@ class legManager:
         q1_rad = results[0][0][2]
         q2_rad = results[1][0][2]
         return np.array([iq1, iq2]), np.array([q1_rad, q2_rad]), np.array([q1d_rad_s, q2d_rad_s])
+    
+    def iq_to_torque(self, iq):
+        return self.bear_kt * iq
     
     def torque2iq(self, u):
         u1, u2 = u

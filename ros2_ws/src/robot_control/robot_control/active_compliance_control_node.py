@@ -1,4 +1,4 @@
-import rclpy
+#import rclpy
 from rclpy.node import Node
 from ros_gz_interfaces.msg import Contacts
 from std_msgs.msg import Float64
