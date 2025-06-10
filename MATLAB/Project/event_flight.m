@@ -1,6 +1,11 @@
 function [zeroCrossing,isterminal,direction] = event_flight(t,X,p)
 
 params = p.params;
+test.x = zeros(0);
+test.F = zeros(3,0); 
+test.tau = zeros(3,0);
+
+
 
 q = X(1:3,:);
 dq = X(4:6,:);
@@ -25,7 +30,7 @@ dJhc = fcn_dJhc(q,dq,params);
 friction = [0 0 0]';
 
 % Controller Torque
-tau = controller_jump(t,X,p); % Feedforward Force + Feedback Stabilization
+tau = controller_jump(t,X,p,test); % Feedforward Force + Feedback Stabilization
 
 % Torque Saturation (INCOMPLETE) 
 
@@ -35,11 +40,20 @@ f_app = [ 0 0 ]';
 % Constrained Dynamic Equations
 % A[ddq ; GRF] = B
 % Regular Dynamics w/ Applied Force: M*ddq - J'*GRF= (B * tau + J' * f_app + friction - C*dq - G );
-% 2nd Derivative of Non-Slip Holonomic Constraint : J * dqq + 0 * GRF = -dJ * dq
-A_matrix = [ M , -Jhc';
+% 2nd Derivative of Non-Slip Holonomic Constraint : J * ddq + 0 * GRF =
+% -dJ * dq - Baumgarte Stabilization Terms
+
+% Baumgarte Stabilization to Prevent ODE solver from violating
+% Holonomic Constraint: dJhc*dq + Jhc*ddq + 2*alpha*Jhc*dq + beta^2*p_hc(0)
+% Stops it from drifting through the floor with another sort of tunable
+% PD control with parameters alpha and beta
+alpha = p.alpha;
+beta  = p.beta;
+
+A_matrix = [ (M + p.M_rotor), -Jhc';
       Jhc, zeros(2,2)];
-B_vector = [ (B * tau + J14' * f_app + friction - C*dq - G ) ; % Re-Evaluate Jacobian in Front of f_app to see if the right type
-            -dJhc * dq];
+B_vector = [ (B * tau + J14' * f_app + friction - C*dq - G ) ;
+            -dJhc * dq - 2 * alpha * Jhc * dq - beta^2 * fcn_phc(q,params)];
 v = A_matrix \ B_vector;
 ddq = v(1:3);
 GRF = reshape(v(4:5),[1,2]);
@@ -49,8 +63,9 @@ threshold = p.threshold; % 2.5% of Static Weight
 
 
 % Assumptions of Flat Ground
-zeroCrossing = GRFy - threshold ; % Y-Force > Some Threshhold (<< Static Weight)
+zeroCrossing = GRFy - threshold;  % Y-Force > Some Threshhold (<< Static Weight)
 isterminal = 1; % Results in termination when condition met
 direction = -1; % Can Occur when from Positive or Negative Crossing
 
 end
+

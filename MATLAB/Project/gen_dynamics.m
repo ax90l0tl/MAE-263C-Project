@@ -10,6 +10,7 @@ syms J2_xx J2_yy J2_zz J2_xy J2_xz J2_yz real
 syms J3_xx J3_yy J3_zz J3_xy J3_xz J3_yz real
 syms g real
 syms X Y real
+syms l2comx l2comy l3comx l3comy real
 
 %% Variable List
 
@@ -39,7 +40,11 @@ m_list_params = {
     'J3_zz' 'p(22)'; 
     'J3_xy' 'p(23)'; 
     'J3_xz' 'p(24)'; 
-    'J3_yz' 'p(25)';};
+    'J3_yz' 'p(25)';
+    'l2comx' 'p(26)'
+    'l2comy' 'p(27)'
+    'l3comx' 'p(28)'
+    'l3comy' 'p(29)'};
 
 % joint position
 m_list_q = {
@@ -63,13 +68,14 @@ q = [q1 q2 q3]'; % height, theta1, theta2
 dq = [dq1 dq2 dq3]';
 
 %% IK - 2D [From Base to Foot]
-pos = [X , Y]';
+pos = [X ; Y];
 
 length_int = norm(pos);
 theta_2 = pi - acos((l2^2 + l3^2 - length_int^2)/(2*l2*l3));
 theta_1 = atan2( Y , X ) - atan2(l3*sin(theta_2),(l2+l3*cos(theta_2))) + pi/2;
-
-q_IK = [ theta_1 theta_2 ]';
+assume([X Y l2 l3],'real'); 
+q_IK = [ theta_1 ; theta_2 ];
+q_IK = simplify(q_IK,'Steps',50);
 write_fcn_m('fcn_IK.m',{'pos','p'},[m_list_p;m_list_params],{q_IK,'q_IK'});
 
 %% FK - 2D
@@ -112,8 +118,13 @@ write_fcn_m('fcn_p14.m',{'q','p'},[m_list_q;m_list_params],{p14,'p14'});
 write_fcn_m('fcn_J14.m',{'q','p'},[m_list_q;m_list_params],{J14,'J14'});
 
 % Foot w.r.t to Hip Joint
-T23 = T23 * T34;
+T24 = T23 * T34;
 p24 = T24(1:2,3);
+J24 = jacobian(p24,q);
+write_fcn_m('fcn_p24.m',{'q','p'},[m_list_q;m_list_params],{p24,'p24'});
+write_fcn_m('fcn_J24.m',{'q','p'},[m_list_q;m_list_params],{J24,'J24'});
+
+
 % Jacobian Derivative 
 dJ4 = sym('dJ4',size(J4));
 for ii = 1:size(dJ4,2)
@@ -139,15 +150,16 @@ dJhc = sym('dJhc',size(Jhc));
 for ii = 1:size(Jhc,2)
     dJhc(:,ii) = jacobian(Jhc(:,ii),q) * dq;
 end
+write_fcn_m('fcn_phc.m',{'q','p'},[m_list_q;m_list_params],{hol_con,'phc'})
 write_fcn_m('fcn_Jhc.m',{'q','p'},[m_list_q;m_list_params],{Jhc,'Jhc'});
 write_fcn_m('fcn_dJhc.m',{'q', 'dq', 'p'},[m_list_q;m_list_dq;m_list_params],{dJhc,'dJhc'});
 
 %% COM Kinematics
 T1com = [eye(2), [l1/2,0]';
        0 0 1];
-T2com = [eye(2), [l2/2,0]';
+T2com = [eye(2), [l2comx,l2comy]';
        0 0 1];
-T3com = [eye(2) , [l3/2,0]';
+T3com = [eye(2) , [l3comx,l3comy]';
        0 0 1];
 
 T01com = T01*T1com;
@@ -204,6 +216,25 @@ write_fcn_m('fcn_Me.m',{'q', 'p'},[m_list_q;m_list_params],{Me,'Me'});
 write_fcn_m('fcn_Ce.m',{'q', 'dq', 'p'},[m_list_q;m_list_dq;m_list_params],{Ce,'Ce'});
 write_fcn_m('fcn_Ge.m',{'q', 'p'},[m_list_q;m_list_params],{Ge,'Ge'});
 write_fcn_m('fcn_Be.m',{'q', 'p'},[m_list_q;m_list_params],{Be,'Be'});
+
+%% Change of Base Grav Comp ( From Eric )
+% l3comx_stance = l3-l3comx;
+% l3comy_stance = l3comy;
+% l2comx_stance = l2-l2comx;
+% l2comy_stance = l2comy;
+% l2com_stance = sqrt(l2comx_stance^2 + l2comy_stance^2);
+% q1_stance = pi/2 + q2 + q1;
+% q2_stance = -q2;
+% FK_hip = [l3*cos(q1_stance) + l2*cos(q1_stance+q2_stance) ;
+%           l3*sin(q1_stance) + l2*sin(q1_stance+q2_stance)];
+% FK_tibia_com = [l3comx_stance*cos(q1_stance);
+%                l3comx_stance*sin(q1_stance);];
+% FK_femur_com = [l3*cos(q1_stance) + l2comx_stance*cos(q1_stance+q2_stance);
+%                 l3*sin(q1_stance) + l2comx_stance*sin(q1_stance+q2_stance); ];
+% G_comp_stance = [0;
+%     -(M3*g*l3comx_stance*cos(q1_stance) + M1*g*(l2*cos(q1_stance+q2_stance)+l3*cos(q1_stance)) +M2*g*(l2com_stance*cos(q1_stance+q2_stance-hip_angle)+l3*cos(q1_stance)));
+%     -(M1+M2+M3)*g*l3*cos(q1+q2) + M3*g*l3comx*cos(q1+q2)];
+
 
 
 %% Rotation Functions

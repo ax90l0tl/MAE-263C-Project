@@ -1,4 +1,4 @@
-function [dXdt,u_out,F_out] = robot_dyn_stance_jump(t,X,p)
+function [dXdt,u_out,F_out,test] = robot_dyn_stance_jump(t,X,p,test)
 % sim_t = t; % Uncomment to Output Simulation Time during Runtime
 
 params = p.params;
@@ -41,9 +41,7 @@ for i = 1:N
     friction = [0 0 0]';
 
     % Controller Torque
-    tau = 10 * controller_jump(t(i),X(:,i),p); % Feedforward Force + Feedback Stabilization
-    
-
+    [tau,test] = controller_jump(t(i),X(:,i),p,test); % Feedforward Force + Feedback Stabilization
 
     % Torque Saturation (INCOMPLETE) 
 
@@ -55,11 +53,20 @@ for i = 1:N
     % Constrained Dynamic Equations
     % A[ddq ; GRF] = B
     % Regular Dynamics w/ Applied Force: M*ddq - J'*GRF= (B * tau + J' * f_app + friction - C*dq - G );
-    % 2nd Derivative of Non-Slip Holonomic Constraint : J * dqq + 0 * GRF = -dJ * dq
-    A_matrix = [ M , -Jhc';
+    % 2nd Derivative of Non-Slip Holonomic Constraint : J * ddq + 0 * GRF =
+    % -dJ * dq - Baumgarte Stabilization Terms
+
+    % Baumgarte Stabilization to Prevent ODE solver from violating
+    % Holonomic Constraint: dJhc*dq + Jhc*ddq + 2*alpha*Jhc*dq + beta^2*p_hc(0)
+    % Stops it from drifting through the floor with another sort of tunable
+    % PD control with parameters alpha and beta
+    alpha = p.alpha;
+    beta  = p.beta;
+
+    A_matrix = [ (M + p.M_rotor) , -Jhc';
           Jhc, zeros(2,2)];
     B_vector = [ (B * tau + J14' * f_app + friction - C*dq - G ) ; % Re-Evaluate Jacobian in Front of f_app to see if the right type
-                -dJhc * dq];
+                -dJhc * dq - 2 * alpha * Jhc * dq - beta^2 * fcn_phc(q,params)];
     v = A_matrix \ B_vector;
     ddq = v(1:3);
     F_out(i,:) = reshape(v(4:5),[1,2]);

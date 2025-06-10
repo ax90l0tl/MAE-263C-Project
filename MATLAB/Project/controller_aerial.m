@@ -15,7 +15,7 @@ Kd = p.Kd_aerial;
 % Desired Foot Position w.r.t Base Link
 % Make Sure within Feasible Workspace, No checks implemented yet
 % -------------------------------
-foot_d = [0 -0.05]'; 
+foot_d = p.foot_d; 
 
 % Forward Kinematics w.r.t. Base Link
 foot = fcn_p14(q,params); % p1_4

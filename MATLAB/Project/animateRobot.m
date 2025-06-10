@@ -1,4 +1,4 @@
-function animateRobot(tin,Xin,p)
+function animateRobot(tin,Xin,p,record)
 
 if size(Xin,2) == 6
     Xin = Xin';
@@ -9,7 +9,7 @@ end
 dtA = 0.05;             %Time step of animation
 timeA = 0:dtA:tin(end);   %Time vector for animation with constant stepping
 
-record = 0;             %Set to 1 if would like to record video and 0 if not
+% record = 0;             %Set to 1 if would like to record video and 0 if not
 if (record)
     v = VideoWriter('CRS_Robot.avi');
     open(v)
@@ -34,6 +34,7 @@ for k = 1:length(timeA)
 end
 %Closing file
 if(record)
+    fprintf("Recording Saved to CRS_Robot.avi!")
     close(v)
 end
 

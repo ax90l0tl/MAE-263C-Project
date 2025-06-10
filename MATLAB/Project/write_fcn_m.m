@@ -57,59 +57,66 @@ status = fclose(fid);
 %disp(' - done');
 
 %=============================================
-function str = replace(str,replace_list)
-% process the longest strings first to keep from accidentally replacing substrings of longer strings
-% perform a bubble sort on 'replace_list' according to decending length of the first element
-% <del>
-% if (size(replace_list,1) > 0)
-%   for loop=1:1:size(replace_list,1)
-%     for i=1:1:size(replace_list,1)-1
-%       if (length(replace_list{i,1}) < length(replace_list{i+1,1}))
-%         temp = replace_list(i,:);
-%         replace_list(i,:) = replace_list(i+1,:);
-%         replace_list(i+1,:) = temp;
-%       end
+% function str = replace(str,replace_list)
+% % process the longest strings first to keep from accidentally replacing substrings of longer strings
+% % perform a bubble sort on 'replace_list' according to decending length of the first element
+% % <del>
+% % if (size(replace_list,1) > 0)
+% %   for loop=1:1:size(replace_list,1)
+% %     for i=1:1:size(replace_list,1)-1
+% %       if (length(replace_list{i,1}) < length(replace_list{i+1,1}))
+% %         temp = replace_list(i,:);
+% %         replace_list(i,:) = replace_list(i+1,:);
+% %         replace_list(i+1,:) = temp;
+% %       end
+% %     end
+% %   end
+% %   for i=size(replace_list,1):-1:1
+% %     orig_str = char(replace_list(i,1));
+% %     new_str = char(replace_list(i,2));
+% %     str = strrep(str,orig_str,new_str);
+% %   end
+% % end
+% % </del>
+% 
+% % <add>
+% delimiters = ' +-/*^%&|!()' ;
+% rem = str ;
+% str = '' ;
+% while(length(rem))
+%     % Handle leading delimiters
+%     if(length(findstr(rem(1), delimiters))) % First character is a delimiter
+%         str = [str rem(1)] ;
+%         rem(1) = [] ;
+%         continue ;
 %     end
-%   end
-%   for i=size(replace_list,1):-1:1
-%     orig_str = char(replace_list(i,1));
-%     new_str = char(replace_list(i,2));
-%     str = strrep(str,orig_str,new_str);
-%   end
+%     [tok rem] = strtok(rem, delimiters) ;
+%     if(length(tok))
+%         found = false ;
+%         for i=1:size(replace_list,1)
+%             if(strcmp(tok, char(replace_list(i,1))))
+%                 str = [str char(replace_list(i,2))] ; % Replace token with replacement string and concatenate.
+%                 found = true ;
+%                 break ;
+%             end
+%         end
+%         if(~found)
+%             str = [str tok] ; % Concatenate token to the string if token is not being replaced with another string.
+%         end
+%     end
+%     if(length(rem)) % If more to process
+%         str = [str rem(1)] ; % Add found delimiter to the string
+%         rem(1) = [] ; % Remove delimiter
+%     end
 % end
-% </del>
+% % </add>
+function str = replace(str, replace_list)
+    for i = 1:size(replace_list, 1)
+        orig = ['(?<![A-Za-z0-9_])', replace_list{i,1}, '(?![A-Za-z0-9_])']; % Match whole word only
+        new = replace_list{i,2};
+        str = regexprep(str, orig, new);
+    end
 
-% <add>
-delimiters = ' +-/*^%&|!()' ;
-rem = str ;
-str = '' ;
-while(length(rem))
-    % Handle leading delimiters
-    if(length(findstr(rem(1), delimiters))) % First character is a delimiter
-        str = [str rem(1)] ;
-        rem(1) = [] ;
-        continue ;
-    end
-    [tok rem] = strtok(rem, delimiters) ;
-    if(length(tok))
-        found = false ;
-        for i=1:size(replace_list,1)
-            if(strcmp(tok, char(replace_list(i,1))))
-                str = [str char(replace_list(i,2))] ; % Replace token with replacement string and concatenate.
-                found = true ;
-                break ;
-            end
-        end
-        if(~found)
-            str = [str tok] ; % Concatenate token to the string if token is not being replaced with another string.
-        end
-    end
-    if(length(rem)) % If more to process
-        str = [str rem(1)] ; % Add found delimiter to the string
-        rem(1) = [] ; % Remove delimiter
-    end
-end
-% </add>
 
 
 function fixlength_m(s1,s2,len,indent,fid)
