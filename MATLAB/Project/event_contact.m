@@ -10,4 +10,4 @@ p4 = fcn_p4(q,params);
 % Assumptions of Flat Ground
 zeroCrossing = p4(2); % Y-coordinate
 isterminal = 1; % Results in termination when condition met
-direction = 0; % Can Occur when from Positive or Negative Crossing
+direction = -1; % Can Occur when from Positive or Negative Crossing

@@ -16,8 +16,8 @@ dXdt = zeros(size(X,1),N);
 
 % If Used in ODE45 Integrator, N = 1 - else N will be same length as input
 for i = 1:N
-    q = X(1:3,:);
-    dq = X(4:6,:);
+    q = X(1:3,i);
+    dq = X(4:6,i);
 
     % Leg Dynamics
     M = fcn_Me(q,params);
@@ -45,8 +45,8 @@ for i = 1:N
     % Belt Transmission Backlash (INCOMPLETE)
     
     % Dynamic Equations
-    ddq = M \ (B * tau + J14' * f_app + friction - C*dq - G );
-    dXdt(:,i) = [dq(:,i); ddq(:,i)];
+    ddq = (M + p.M_rotor)\ (B * tau + J14' * f_app + friction - C*dq - G );
+    dXdt(:,i) = [dq; ddq];
 end
 
 end
