@@ -10,8 +10,8 @@ p.foot_d_stance = [-0.005 -0.275]';
 
 % Gains Matrices
 %       Stance Phase
-p.Kp_stance = diag(150 * [1 1.25]);
-p.Kd_stance = diag(15* [1 1]);
+p.Kp_stance = diag(150 * [1 2]);
+p.Kd_stance = diag(10* [1 1]);
 %       Jump   Phase ( Joint Space ) 
 p.Kp_jump = diag(0.75 * [1 0.75]);
 p.Kd_jump = diag(0.075 * [1 0.75]); %0.00625
@@ -82,9 +82,9 @@ l3_COM_Y = -0.019215548 ;
 M1 = 0.67514650 ; % unit: kg
 M2 = 0.48206937 ;
 M3 = 0.06067653;
-p.weight = (M1 + M2 + M3) * g;
-p.jump_force = jump_magnitude * p.weight;
-p.threshold = liftoff_percentage * p.weight;
+
+p.jump_force = jump_magnitude * (M1+M2+M3)*g;
+p.threshold = liftoff_percentage * (M1 + M2 + M3) * g;
 
 p.torque_limit = 20.1;
 
@@ -166,7 +166,7 @@ p.B_motor = [torque_limit ; torque_limit ; stall_torque ; stall_torque];
 
 params = [g, l1, l2, l3, M1, M2, M3, J1_xx, J1_yy, J1_zz, J1_xy, J1_xz,...
     J1_yz, J2_xx, J2_yy, J2_zz, J2_xy, J2_xz, J2_yz, J3_xx, J3_yy, J3_zz,...
-    J3_xy, J3_xz, J3_yz,l2_COM_X,l2_COM_Y,l3_COM_X,l3_COM_Y];
+    J3_xy, J3_xz, J3_yz];
 
 p.friction = [tau1_Coulomb; tau2_Coulomb; tau3_Coulomb; b1_viscous; b2_viscous; b3_viscous];
 p.params = params;

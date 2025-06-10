@@ -40,3 +40,6 @@ robot_dyn_stance_jump(t_out(i),X(i,:),p,test)
 plotRobot(X_out(i,1:3),p)
 
 %% 
+if true
+    fprintf("poo")
+end
