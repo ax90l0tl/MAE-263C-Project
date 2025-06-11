@@ -44,8 +44,15 @@ class legManager:
             exit(1)
         return node
     
+    def flush_imu_buffer(self):
+        self.imu.reset_input_buffer()
+        return
+    
     def get_foot_sensor_state(self):
         return self.imu.getGpioState(self.gpio_pin)
+    
+    def get_imu_data(self):
+        return
 
     def _search_bear(self):
         searched_list = []
@@ -97,6 +104,12 @@ class legManager:
         iq1 = np.clip(iq1, -self.iq_max, self.iq_max)
         iq2 = np.clip(iq2, -self.iq_max, self.iq_max)
         return [iq1, iq2]
+    
+    def iq2torque(self, iq):
+        iq1, iq2 = iq
+        u1 = iq1 * self.bear_kt
+        u2 = iq2 * self.bear_kt
+        return [u1, u2]
         
     def move_motors(self, goal_u):
         goal_iq = self.torque2iq(goal_u)

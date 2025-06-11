@@ -9,7 +9,7 @@
 2. Install packages:
 
     ```bash
-    pip3 install numpy scipy sympy pyserial
+    pip3 install numpy scipy sympy pyserial matplotlib
     ```
 
 3. Install PyBEAR. Navigate to /PyBEAR and enter:
