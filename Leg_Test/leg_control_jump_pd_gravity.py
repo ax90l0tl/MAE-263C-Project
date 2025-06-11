@@ -9,10 +9,17 @@ import msvcrt  # For Windows keyboard input
 import os
 from datetime import datetime
 import logging
+import argparse
+
 
 # Logging setup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
+
+# Argument parser setup
+parser = argparse.ArgumentParser(description='Run PD control loop with optional data recording.')
+parser.add_argument('--record', action='store_true', help='Enable data recording and plotting')
+args = parser.parse_args()
 
 # User-modifiable parameters
 bear_port = 'COM3'
@@ -27,23 +34,22 @@ P_DES = {
     'IDLE': [0, -0.25],
     'PREP': [0, -0.18],
     'JUMP': [0, -0.32],
-    'LAND': [0, -0.18],
+    'LAND': [0, -0.220],
 }
 
 # Gains
 KP = {
     'IDLE': np.diag([3, 4]),
-    'PREP': np.diag([3, 4]),
-    'JUMP': np.diag([20, 25]),
+    'PREP': np.diag([1, 1.5]),
+    'JUMP': np.diag([10, 12.5]),
     'LAND': np.diag([3, 4]),
     }
 KD = {
     'IDLE': np.diag([0.2, 0.2]),
-    'PREP': np.diag([0.2, 0.2]),
-    'JUMP': np.diag([0.8, 0.8]),
+    'PREP': np.diag([0.1, 0.1]),
+    'JUMP': np.diag([0.6, 0.6]),
     'LAND': np.diag([0.2, 0.2]),
 }
-
 
 # Initialize bear manager and desired controller
 leg  = legManager(bear_port=bear_port, sensor_port=sensor_port)
@@ -53,10 +59,11 @@ controller = pdGravCompController()  # Leave blank if using the default values
 input("Press Enter to start control loop and toggle target position. Press Esc anytime to exit.")
 leg.enable_torque(1)
 
-# # For data collection
-# pos_desired = []
-# pos_measured = []
-# start_time = time.time()
+# For data collection
+if args.record:
+    logger.info("Data recording enabled.")
+    recorded_data = []
+    start_time = time.time()
 
 # Finite state machine
 current_state = 'IDLE'
@@ -65,18 +72,9 @@ q_des = controller.calculate_IK(P_DES[current_state])
 while True:
     # Get feedback
     iq, q_rad, qd_rad_s = leg.get_feedback()
-
-    # # save data for plotting
-    # current_time = time.time() - start_time
-    # pos_desired.append([current_time, q_des[0], q_des[1]])
-    # pos_measured.append([current_time, q_rad[0], q_rad[1]])
-    # if len(pos_desired) > num_samples:
-    #     print("Max duration reached, exiting data collection.")
-    #     break
-
-    # Get foot sensor state
-    phase = 'AERIAL' if leg.get_foot_sensor_state() else 'STANCE'
-    # print(phase)
+    foot_state = leg.get_foot_sensor_state()
+    phase = 'AERIAL' if foot_state else 'STANCE'
+    logger.debug(phase)
 
     # State transitions
     if msvcrt.kbhit():
@@ -115,27 +113,58 @@ while True:
 
     # Compute control action
     u = controller.calc_control_torque(q_des, q_rad, qd_rad_s, kp, kd, phase)
-    # print(f"calculated control torque: {u}")
+    logger.debug(f"calculated control torque: {u}")
     leg.move_motors(u)
+
+    # save data for plotting
+    if args.record:
+        current_time = time.time() - start_time
+        u_meas = leg.iq2torque(iq)
+        recorded_data.append([current_time, foot_state,
+                              q_des[0], q_rad[0], qd_rad_s[0], qd_rad_s[0], u[0], u_meas[0], 
+                              q_des[1], q_rad[1], qd_rad_s[1], qd_rad_s[1], u[1], u_meas[1], 
+                              ])
+        if len(recorded_data) > num_samples:
+            logger.info("Max duration reached, exiting data collection.")
+            leg.enable_torque(0)
+            break
 
     # Delay based on sampling rate
     time.sleep(Ts)
 
-# final_time = time.time() - start_time
-# print(f"True sampling rate: {len(pos_desired) / final_time:.2f} Hz")
+if args.record:
+    final_time = time.time() - start_time
+    recorded_data = np.array(recorded_data)
+    logger.info(f"True sampling rate: {len(recorded_data) / final_time:.2f} Hz")
+    logger.debug(f"Recorded data: {recorded_data}")
 
-# print(len(pos_desired), len(pos_measured))
-# pos_desired = np.array(pos_desired)
-# pos_measured = np.array(pos_measured)  
+    # Save to CSV
+    date_str = datetime.now().strftime("%Y%m%d")
+    csv_base = f"pd_jump_{date_str}"
+    csv_dir = "experiments/pd_w_gravity_jump"
+    os.makedirs(csv_dir, exist_ok=True)
+    i = 0
+    while True:
+        csv_path = os.path.join(csv_dir, f"{csv_base}_{i}.csv")
+        plot_path = os.path.join(csv_dir, f"{csv_base}_{i}.png")
+        if not os.path.exists(csv_path) and not os.path.exists(plot_path):
+            break
+        i += 1
+    np.savetxt(csv_path, recorded_data, delimiter=",", 
+               header="timestamp, foot_state, " \
+               "q1_des, q1_meas, q1d_des, q2d_meas, u1_des, u1_meas, " \
+               "q2_des, q2_meas, q2d_des, q2d_meas, u2_des, u2_meas", comments='')
+    print(f"Saved data to: {csv_path}")
 
+# # Plotting the recorded data
 # fig, axs = plt.subplots(1, 2, figsize=(14, 6))
 
 # # Joint 1
-# axs[0].plot(pos_desired[:, 0], pos_desired[:, 1], label='Desired Position', linestyle='--')
-# axs[0].plot(pos_measured[:, 0], pos_measured[:, 1], label='Measured Position')
+# axs[0].plot(recorded_data[:, 0], recorded_data[:, 1], label='Desired Position', linestyle='--')
+# axs[0].plot(recorded_data[:, 0], recorded_data[:, 2], label='Measured Position')
 # # Add desired position ±0.01 as dashed lines
-# axs[0].plot(pos_desired[:, 0], pos_desired[:, 1] + 0.01, 'k--', alpha=0.5, linewidth=0.8, label='Desired +0.01 rad')
-# axs[0].plot(pos_desired[:, 0], pos_desired[:, 1] - 0.01, 'k--', alpha=0.5, linewidth=0.8, label='Desired -0.01 rad')
+# axs[0].plot(recorded_data[:, 0], recorded_data[:, 1] + 0.01, 'k--', alpha=0.5, linewidth=0.8, label='Desired +0.01 rad')
+# axs[0].plot(recorded_data[:, 0], recorded_data[:, 1] - 0.01, 'k--', alpha=0.5, linewidth=0.8, label='Desired -0.01 rad')
 # axs[0].set_xlabel('Time (s)')
 # axs[0].set_ylabel('Joint 1 Position (rad)')
 # axs[0].set_title('Joint 1: Desired vs Measured')
@@ -143,35 +172,18 @@ while True:
 # axs[0].grid(True)
 
 # # Joint 2
-# axs[1].plot(pos_desired[:, 0], pos_desired[:, 2], label='Desired Position', linestyle='--')
-# axs[1].plot(pos_measured[:, 0], pos_measured[:, 2], label='Measured Position')
+# axs[1].plot(recorded_data[:, 0], recorded_data[:, 5], label='Desired Position', linestyle='--')
+# axs[1].plot(recorded_data[:, 0], recorded_data[:, 6], label='Measured Position')
 # # Add desired position ±0.01 as dashed lines
-# axs[1].plot(pos_desired[:, 0], pos_desired[:, 2] + 0.01, 'k--', alpha=0.5, linewidth=0.5, label='Desired +0.01 rad')
-# axs[1].plot(pos_desired[:, 0], pos_desired[:, 2] - 0.01, 'k--', alpha=0.5, linewidth=0.5, label='Desired -0.01 rad')
+# axs[1].plot(recorded_data[:, 0], recorded_data[:, 5] + 0.01, 'k--', alpha=0.5, linewidth=0.5, label='Desired +0.01 rad')
+# axs[1].plot(recorded_data[:, 0], recorded_data[:, 5] - 0.01, 'k--', alpha=0.5, linewidth=0.5, label='Desired -0.01 rad')
 # axs[1].set_xlabel('Time (s)')
 # axs[1].set_ylabel('Joint 2 Position (rad)')
 # axs[1].set_title('Joint 2: Desired vs Measured')
 # axs[1].legend()
 # axs[1].grid(True)
 
+# fig.savefig(plot_path, dpi=300)
+# print(f"Saved plot to: {plot_path}")
 # plt.tight_layout()
 # plt.show()
-
-# # Save logic
-# csv_base = "pd_w_gravity"
-# date_str = datetime.now().strftime("%Y%m%d")
-# csv_base = f"pd_w_gravity_{date_str}"
-# data = np.hstack([pos_desired, pos_measured[:, 1:]])
-# csv_dir = "experiments/pd_w_gravity"
-# os.makedirs(csv_dir, exist_ok=True)
-# i = 0
-# while True:
-#     csv_path = os.path.join(csv_dir, f"{csv_base}_{i}.csv")
-#     plot_path = os.path.join(csv_dir, f"{csv_base}_{i}.png")
-#     if not os.path.exists(csv_path) and not os.path.exists(plot_path):
-#         break
-#     i += 1
-# np.savetxt(csv_path, data, delimiter=",", header="time, q1_des, q2_des, q1_actual, q2_actual", comments='')
-# fig.savefig(plot_path, dpi=300)
-# print(f"Saved data to: {csv_path}")
-# print(f"Saved plot to: {plot_path}")
