@@ -82,8 +82,8 @@ from sympy import lambdify
 l1 = 125
 l2 = 215
 
-q1 = -45   # WRT to the +x axis, CCW positive.
-q2 = 90   # WRT to the extension of link 1, CCW positive.
+q1 = -48   # WRT to the +x axis, CCW positive.
+q2 = 98   # WRT to the extension of link 1, CCW positive.
 
 q1 = (q1 - 90) * pi / 180  # Converting q1 to the angle WRT to the +x axis, CCW positive.
 q2 = q2 * pi / 180 
@@ -100,3 +100,14 @@ print(f"q1p = {degrees(q1p)}, q2p = {degrees(q2p)}")
 pe = np.array([l1*cos(q1p + q2p) + l2*cos(q1p), 
                l1*sin(q1p + q2p) + l2*sin(q1p)])
 print("Joint 1 WRT foot contact", pe)
+
+
+# # Jacobian Calculation
+# q1, q2, l1, l2= sp.symbols('q1 q2 l1 l2')
+# pe = sp.Matrix([l2*sp.cos(q1 + q2) + l1*sp.cos(q1), 
+#                l2*sp.sin(q1 + q2) + l1*sp.sin(q1)])
+# q = sp.Matrix([q1, q2])
+# Jc = pe.jacobian(q)
+# print("Jc: ")
+# print()
+# sp.pprint(Jc)

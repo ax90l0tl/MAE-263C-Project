@@ -2,6 +2,10 @@ from pybear import Manager
 from pybear.CONTROL_TABLE import *
 from MSCL import mscl
 import numpy as np
+import time
+import serial
+import threading
+import struct
 
 '''
 Prior to running this wrapper, ensure that you have:
@@ -17,16 +21,26 @@ class legManager:
         self.gpio_pin = gpio_pin
         self.bear_kt = 1.16  # Nm/A, from BEAR SDK. Koala: 0.35, Koala MB: 1.16.
         self.iq_max = 20
+        self.PACKET_SIZE = 57
+        self.SYNC_BYTES = b'\x75\x65\x80'
 
         self.bear = Manager.BEAR(port=self.bear_port, baudrate=self.baudrate)
         self.bear_ids = self._search_bear() 
         self._configure_bear_motors()
-        self.imu = self._init_imu(self.sensor_port, self.gpio_pin)  # GPIO pin 1 for foot sensor
+        self.imu = self._init_imu()  # GPIO pin 1 for foot sensor
 
-    def _init_imu(self, COM_PORT, GPIO_PIN):
+        self.gpio_state = 0
+        self.y_acc = 0
+
+        self.freq = 300
+        self._running = True
+        self._thread = threading.Thread(target=self._imu_polling, daemon=True)
+        self._thread.start()
+
+    def _init_imu(self):
         try:
             #create a Serial Connection with the specified COM Port, default baud rate of 921600
-            connection = mscl.Connection.Serial(COM_PORT)
+            connection = mscl.Connection.Serial(self.sensor_port)
             #create an InertialNode with the connection
             node = mscl.InertialNode(connection)
         except mscl.Error as e:
@@ -35,24 +49,58 @@ class legManager:
         # To use a GPIO pin, we first need to configure it
         try:
             new_config = mscl.GpioConfiguration()
-            new_config.pin = GPIO_PIN  # GPIO pin number
+            new_config.pin = self.gpio_pin  # GPIO pin number
             new_config.feature = new_config.GPIO_FEATURE  # Set pin as GPIO
             new_config.behavior = new_config.GPIO_INPUT  # Set GPIO pin as input
             node.setGpioConfig(new_config)  # Apply the configuration
+            del node
         except mscl.Error as e:
             print("Error:", e)
             exit(1)
-        return node
+        connection.disconnect()
+        time.sleep(0.5)
+        ser = serial.Serial(self.sensor_port, 115200)
+        return ser
     
+    def _sync_and_read_packet(self):
+        while True:
+            byte = self.imu.read(1)
+            if byte == self.SYNC_BYTES[0:1]:
+                next_byte = self.imu.read(1)
+                if next_byte == self.SYNC_BYTES[1:2]:
+                    next_byte = self.imu.read(1)
+                    if next_byte == self.SYNC_BYTES[2:3]:
+                        # We've found the sync sequence
+                        rest = self.imu.read(self.PACKET_SIZE - 3)
+                        if len(rest) == self.PACKET_SIZE - 3:
+                            return self.SYNC_BYTES + rest  # Return full 64-byte packet
+    
+    def _imu_polling(self):
+        period = 1.0 / self.freq
+        while self._running:
+            packet = self._sync_and_read_packet()
+            # print("Received packet:", ' '.join(f'{b:02X}' for b in packet))
+            y_acc_raw = packet[24:28]
+            y_acc = struct.unpack('>f', bytearray(y_acc_raw))
+            self.y_acc = y_acc[0]
+            self.gpio_state = int(packet[54])
+            time.sleep(period)
+
+    def stop_imu(self):
+        """Gracefully stop the background thread."""
+        self._running = False
+        self._thread.join()
+
     def flush_imu_buffer(self):
         self.imu.reset_input_buffer()
         return
     
     def get_foot_sensor_state(self):
-        return self.imu.getGpioState(self.gpio_pin)
+        # return self.imu.getGpioState(self.gpio_pin)
+        return self.gpio_state
     
     def get_imu_data(self):
-        return
+        return self.y_acc
 
     def _search_bear(self):
         searched_list = []
