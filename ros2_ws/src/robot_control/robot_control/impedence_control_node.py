@@ -101,15 +101,20 @@ class impedence_control_node(Node):
     def timer_callback(self):
         # Use PID to get to starting position when the node starts
         current_time = self.get_clock().now().nanoseconds
+        if np.abs(self.on_ground_time - current_time) > 1e6:
+            # print(np.abs(self.on_ground_time - current_time))
+            # print("in_air")
+            self.on_ground = False
         if (current_time - self.start_time)/(1e9) < 5.0 or (current_time - self.reset_time)/(1e9) < 5.0 or (current_time - self.last_sim_time)/(1e9) > 5.0:
             self.u, self.error = pid_control(self.q, np.array([-1.5, 2.0]), self.qd, self.Kp_pid, self.Kd_pid, self.Ki_pid, error_prev=self.error, dt=0.005)
         else:
             if self.jump:
                 if self.state == states['IDLE']:
                     self.state = states['CROUCH']
-                    self.x_d_traj_points = x_d_idle_to_crouch_traj.copy()
-                    self.xd_d_traj_points = xd_d_idle_to_crouch_traj.copy()
-                    self.xdd_d_traj_points = xdd_d_idle_to_crouch_traj.copy()
+                    min_idx = np.argmin(np.linalg.norm(x_d_idle_to_crouch_traj-self.x, axis=1))
+                    self.x_d_traj_points = x_d_idle_to_crouch_traj.copy()[min_idx:]
+                    self.xd_d_traj_points = xd_d_idle_to_crouch_traj.copy()[min_idx:]
+                    self.xdd_d_traj_points = xdd_d_idle_to_crouch_traj.copy()[min_idx:]
                 elif self.state == states['CROUCH']:
                     y = compute_y(self.x_d_traj_points[0], self.xd_d_traj_points[0], 
                                     self.xdd_d_traj_points[0], self.x, self.q, self.qd, self.robot, self.Md, self.Kp, self.Kd)
@@ -119,12 +124,10 @@ class impedence_control_node(Node):
                         self.xd_d_traj_points = self.xd_d_traj_points[1:]
                         self.xdd_d_traj_points = self.xdd_d_traj_points[1:]
                     else:
-                        print("max_error: ", np.max(np.abs(self.x - self.x_d_traj_points)))
-                        if np.max(np.abs(self.x - self.x_d_traj_points)) < 0.05:
-                            self.state = states['JUMP']
-                            self.x_d_traj_points = x_d_crouch_to_jump_traj.copy()
-                            self.xd_d_traj_points = xd_d_crouch_to_jump_traj.copy()
-                            self.xdd_d_traj_points = xdd_d_crouch_to_jump_traj.copy()
+                        self.state = states['JUMP']
+                        self.x_d_traj_points = x_d_crouch_to_jump_traj.copy()
+                        self.xd_d_traj_points = xd_d_crouch_to_jump_traj.copy()
+                        self.xdd_d_traj_points = xdd_d_crouch_to_jump_traj.copy()
                 elif self.state == states['JUMP']:
                     y = compute_y(self.x_d_traj_points[0], self.xd_d_traj_points[0], 
                                     self.xdd_d_traj_points[0], self.x, self.q, self.qd, self.robot, self.Md, self.Kp, self.Kd)
@@ -134,31 +137,33 @@ class impedence_control_node(Node):
                         self.xd_d_traj_points = self.xd_d_traj_points[1:]
                         self.xdd_d_traj_points = self.xdd_d_traj_points[1:]
                     else:
-                        if (self.get_clock().now().nanoseconds - self.on_ground_time) > 100000:
+                        print(self.on_ground)
+                        if not self.on_ground:
+                            print("in_air")
+                            print("switching gains")
                             self.state = states['IN_AIR']
                             self.landing_time = self.get_clock().now().nanoseconds
-                        else:
-                            self.state = states['IDLE']
-                            self.jump = False
+                        # else:
+                            # self.state = states['IDLE']
+                            # self.jump = False
 
                 elif self.state == states['IN_AIR']:
-                    print("switching gains")
-                    print("on_ground: ", (self.get_clock().now().nanoseconds - self.on_ground_time))
                     self.x_d = x_d_idle
                     y = compute_y(x_d_idle, xd_d_idle, xdd_d_idle, self.x, self.q, self.qd, self.robot,
                                 self.Md_landing, self.Kp_landing, self.Kd_landing)
-                    self.u = compute_impedence_output(y, self.q, self.qd, self.robot)
-                    if (self.get_clock().now().nanoseconds - self.landing_time)/(1e9) > 2.0:
+                    self.u = compute_impedence_output(y, self.q, self.qd, self.robot, on_ground=self.on_ground)
+                    if np.max(np.abs(self.qd)) < 0.05:
                         self.state = states['IDLE']
-                        self.jump = False
-                self.x_d = self.x_d_traj_points[0]
+                        self.jump = True
+                        self.x_d = self.x
+                # self.x_d = self.x_d_traj_points[0]
                     
             else:
                 # Idle state
                 self.state = states['IDLE']
                 # print(self.robot.inverse_kinematics(self.x_d))
-                self.x_d = x_d_idle
-                y = compute_y(x_d_idle, xd_d_idle, xdd_d_idle, self.x, self.q, self.qd, self.robot, self.Md, self.Kp, self.Kd)
+                # self.x_d = x_d_idle
+                y = compute_y(self.x_d, xd_d_idle, xdd_d_idle, self.x, self.q, self.qd, self.robot, self.Md, self.Kp, self.Kd)
                 self.u = compute_impedence_output(y, self.q, self.qd, self.robot)
                 # print("u", self.u)
 
