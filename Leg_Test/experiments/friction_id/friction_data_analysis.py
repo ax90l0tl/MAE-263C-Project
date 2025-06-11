@@ -3,8 +3,8 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 
-motor_numbers = [115, 116, 121]
-trial_numbers = [0, 1, 2]
+motor_numbers = [115, 116]
+trial_numbers = [0, 1]
 
 linear_velocity = 15  # range that we consider linear
 velocity_threshold = 0.5  # threshold for velocity to be considered zero
@@ -13,7 +13,7 @@ positive_speeds = np.arange(0, linear_velocity, 0.1)
 
 coefficients = np.zeros((len(motor_numbers) * len(trial_numbers), 4))  # to store coefficients for each motor per trial
 
-fig, axs = plt.subplots(3, figsize=(10, 15))  # Create subplots
+fig, axs = plt.subplots(2, figsize=(10, 20))  # Create subplots
 fig.subplots_adjust(hspace=0.5)  # Adjust space between subplots
 for ax in axs:
     ax.grid(True)

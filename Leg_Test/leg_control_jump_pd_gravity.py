@@ -41,13 +41,13 @@ P_DES = {
 KP = {
     'IDLE': np.diag([3, 4]),
     'PREP': np.diag([1, 1.5]),
-    'JUMP': np.diag([10, 12.5]),
+    'JUMP': np.diag([10, 18]),
     'LAND': np.diag([3, 4]),
     }
 KD = {
     'IDLE': np.diag([0.2, 0.2]),
     'PREP': np.diag([0.1, 0.1]),
-    'JUMP': np.diag([0.6, 0.6]),
+    'JUMP': np.diag([0.6, 0.8]),
     'LAND': np.diag([0.2, 0.2]),
 }
 
@@ -123,6 +123,7 @@ while True:
         recorded_data.append([current_time, foot_state,
                               q_des[0], q_rad[0], qd_rad_s[0], qd_rad_s[0], u[0], u_meas[0], 
                               q_des[1], q_rad[1], qd_rad_s[1], qd_rad_s[1], u[1], u_meas[1], 
+                              leg.y_acc
                               ])
         if len(recorded_data) > num_samples:
             logger.info("Max duration reached, exiting data collection.")
