@@ -1,4 +1,4 @@
-function [u,test] = controller_jump(t,X,p,test)
+function [u,test] = controller_stand(t,X,p,test)
 params = p.params;
 q = X(1:3);
 dq = X(4:6);

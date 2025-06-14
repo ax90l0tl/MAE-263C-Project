@@ -1,40 +1,40 @@
-% MAE263C-Jumping Leg simulation
-% Author: Conrad Ku (Adapted from the HOPPY Simulator
-% Last modified: 02/23/2021
+% MAE263C-Jumping Leg Simulation
+% Author: Conrad Ku (Adapted from the HOPPY Simulator)
+% Last modified: 06/11/2025
 
 clear all
 close all
 clc
 
-% addpath gen
-% addpath fcns
+addpath generate_functions\
+addpath controllers\
+addpath dynamics\
+addpath generate_functions\
+addpath events\
+addpath plotting\
 
 % --- parameters ---
 % Get the parameters about the robot and simulation settings
 p = get_params();
 params = p.params;
-
 N_jumps = 3;
-
 dt = 0.01;
-% Debugging Jump Controller
-test.x = zeros(0); % debugging phase variable
-test.F = zeros(3,0);
-test.tau = zeros(3,0);
-
-
+contact_state = zeros(1);
+Q_des = fcn_IK(p.foot_d,params)';
+p_des = p.foot_d';
 
 %Initial condition:
-q0 = [0.35; -pi/4; pi/2];
+q0 = [0.5; -pi/4; pi/2];
 dq0 = [0; 0; 0];
 ic = [q0; dq0;]; 
 
-% Checks if the Foot is already on the Ground
+% Checks if the Foot is already on the Ground From ICs
 foot_init = fcn_p4(q0,params);
 if foot_init(2)<0
     fprintf('Start Above the Floor! \n')
     return
 end
+
 
 % Time Lengths
 t_start = 0;
@@ -45,8 +45,17 @@ t_out = t_start; % Simulation Time
 X_out = ic'; % States
 U_out = [ 0 0 ]; % Input Torques
 F_out = [ 0 0 ]; % GRFs
+P_out = fcn_p14(q0,params)';
+
+
+% Debugging Jump Controller
+test.x = zeros(0); % debugging phase variable
+test.F = zeros(3,0);
+test.tau = zeros(3,0);
 
 p.time_contact = zeros(2,0); % Stores contact time in (1), then stance time in (2)
+
+%% Starting Dynamics Solver
 fprintf('Aerial Phase \n')
 % Iterate Through # of Hops
 for i=1:N_jumps+1
@@ -69,12 +78,15 @@ for i=1:N_jumps+1
     U_out = [U_out ; U(2:n_timesteps,:)];
     F_out = [F_out ; F(2:n_timesteps,:)];
     t_start = t_out(end); % Log the new Start Time for the Next Phase
-     % # try plotting up against task space 
+    contact_state = [contact_state; zeros(length(t(2:n_timesteps)),1)];
+    Q_des = [Q_des; repmat(fcn_IK(p.foot_d,params)',length(t(2:n_timesteps)),1)];
+    p_des = [p_des;repmat(p.foot_d',length(t(2:n_timesteps)),1)];
     % Operational Space Control in the Air 
     p_out = zeros(length(t),2);
     for j=1:size(X,1)
         p_out(j,:) = fcn_p14(X(j,1:3),params)';
     end
+    P_out = [P_out; p_out(2:n_timesteps,:)];
     % Plot
     figure()
     plot(t,p_out(:,1),'r','LineWidth',2)
@@ -104,6 +116,13 @@ for i=1:N_jumps+1
         [~,U,F] = robot_dyn_stance_stand(t,X,p); % Collect Input Torques and Ground Forces
         U_out = [U_out ; U(2:n_timesteps,:)];
         F_out = [F_out ; F(2:n_timesteps,:)];
+        contact_state = [contact_state; ones(length(t(2:n_timesteps)),1)];
+        Q_des = [Q_des; repmat(fcn_IK(p.foot_d_stance,params)',length(t(2:n_timesteps)),1)];
+        p_des = [p_des;repmat(p.foot_d_stance',length(t(2:n_timesteps)),1)];
+        for j=1:size(X,1)
+            p_out(j,:) = fcn_p14(X(j,1:3),params)';
+        end
+        P_out = [P_out; p_out(2:n_timesteps,:)];
         fprintf('Holding Pose! \n')
         fprintf('Simulation Ended at %.3f s\n', t(end))
     else % Jump
@@ -124,6 +143,13 @@ for i=1:N_jumps+1
         [~,U,F,test] = robot_dyn_stance_jump(t,X,p,test); % Collect Input Torques and Ground Forces
         U_out = [U_out ; U(2:n_timesteps,:)];
         F_out = [F_out ; F(2:n_timesteps,:)];
+        contact_state = [contact_state; ones(length(t(2:n_timesteps)),1)];
+        Q_des = [Q_des; repmat(fcn_IK(p.foot_d_stance,params)',length(t(2:n_timesteps)),1)];
+        p_des = [p_des;repmat(p.foot_d_stance',length(t(2:n_timesteps)),1)];
+        for j=1:size(X,1)
+            p_out(j,:) = fcn_p14(X(j,1:3),params)';
+        end
+        P_out = [P_out; p_out(2:n_timesteps,:)];
         t_start = t_out(end); % Log the new Start Time for the Next Phase
         if t(end)==t_final
             fprintf('Could not Achieve Jump \n')
@@ -152,7 +178,6 @@ for i=1:length(t_out)
     end
 end
 % Knee
-% Hip
 for i=1:length(t_out)
     omega = X_out(i,6);
     tau = U_out(i,2);
@@ -161,6 +186,11 @@ for i=1:length(t_out)
         fprintf('Knee Motor Torque Exceeds Limits at Time: %f s \n', t_out(i))
     end
 end
+% Base Acceleration
+d_v = diff(X_out(:,4));
+d_t = diff(t_out);
+hip_accel = [ 0; d_v./d_t];
+hip_force = [hip_accel*params(1)*(params(5)+params(6)+params(7))];
 
 figure()
 plot(t_out,X_out(:,1))
