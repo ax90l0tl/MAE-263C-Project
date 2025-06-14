@@ -13,40 +13,20 @@ p.foot_d_stance = [-0.005 -0.275]';
 p.Kp_stance = diag(150 * [1 1.25]);
 p.Kd_stance = diag(15* [1 1]);
 %       Jump   Phase ( Joint Space ) 
-p.Kp_jump = diag(0.75 * [1 0.75]);
-p.Kd_jump = diag(0.075 * [1 0.75]); %0.00625
+p.Kp_jump = diag(1.5 * [1 0.75]);
+p.Kd_jump = diag(0.0875 * [1 1]); 
 
 %       Aerial Phase ( Task Space X/Y)
-p.Kp_aerial = diag(250 * [1 2]);
-p.Kd_aerial = diag(100 * [1 0.875]);
+p.Kp_aerial = diag(300 * [1.5 2]);
+p.Kd_aerial = diag(75 * [0.625 0.875]);
 
 % Jump Variables (Speedier Jump is better for liftoff - otherwise need more
 % Force Commanded for a static Jump
-p.time_stance = 1.25;
-jump_magnitude = 5; % X times the static weight
+p.time_stance = 1;
+jump_magnitude = 15; % X times the static weight
+% Peak Doesn't Usually Matter Since the Leg Lifts Off before the Full
+% Trajectory - however, a higher peak results in a faster impulse
 
-% Good without Rotor Inertia!!!!!!!!!!!!!
-% % Aerial Phase Foot Position
-% p.foot_d = [0 -0.225]'; 
-% % Stance Phase Foot Position
-% p.foot_d_stance = [-0.05 -0.25]'; 
-% 
-% % Gains Matrices
-% %       Stance Phase
-% p.Kp_stance = diag(5 * [1 1]);
-% p.Kd_stance = diag(0.5 * [1 1]);
-% %       Jump   Phase ( Joint Space ) 
-% p.Kp_jump = diag(1 * [1 0.5]);
-% p.Kd_jump = diag(0.1 * [1 0.5]); %0.00625
-% 
-% %       Aerial Phase ( Task Space X/Y)
-% p.Kp_aerial = diag(30 * [1 5]);
-% p.Kd_aerial = diag(15 * [1 1]);
-% 
-% % Jump Variables (Speedier Jump is better for liftoff - otherwise need more
-% % Force Commanded for a static Jump
-% p.time_stance = 2;
-% jump_magnitude = 2.5; % X times the static weight
 
 % Baumgarte Numerical Stabilization Values
 p.alpha = 10;
@@ -57,8 +37,6 @@ p.beta_standing = 500;
 % Liftoff Force Threshold
 liftoff_percentage = 0.025;
 
-
- 
 
 %% parameters for matrix calculations
 
@@ -86,7 +64,7 @@ p.weight = (M1 + M2 + M3) * g;
 p.jump_force = jump_magnitude * p.weight;
 p.threshold = liftoff_percentage * p.weight;
 
-p.torque_limit = 20.1;
+p.torque_limit = 1.16*20;
 
 % Hip Joint and Velocity Limits
 p.hip_lower=-2.8;
@@ -152,7 +130,7 @@ R_armature = 0.6; % ohm
 % Motor Specs
 torque_limit = 20; % N-m
 max_voltage = 24; % V
-max_current = 30;
+max_current = 20;
 no_load_speed = kv*max_voltage;
 stall_torque = kt * max_current;
 
