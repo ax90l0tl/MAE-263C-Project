@@ -1,6 +1,6 @@
 impedence_control_node:
   ros__parameters:
-    Kp: [1000.0, 1000.0]
+    Kp: [7000.0, 7000.0]
     Kd: [100.0, 100.0]
     Md: [1.0, 1.0]
 

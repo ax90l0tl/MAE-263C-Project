@@ -136,6 +136,7 @@ class impedence_control_node(Node):
                         self.x_d_traj_points = self.x_d_traj_points[1:]
                         self.xd_d_traj_points = self.xd_d_traj_points[1:]
                         self.xdd_d_traj_points = self.xdd_d_traj_points[1:]
+
                     else:
                         print(self.on_ground)
                         if not self.on_ground:
@@ -154,9 +155,12 @@ class impedence_control_node(Node):
                     self.u = compute_impedence_output(y, self.q, self.qd, self.robot, on_ground=self.on_ground)
                     if np.max(np.abs(self.qd)) < 0.05:
                         self.state = states['IDLE']
-                        self.jump = True
-                        self.x_d = self.x
-                # self.x_d = self.x_d_traj_points[0]
+                        # for continuous jumping
+                        # self.jump = True
+                        self.jump = False
+                        self.x_d_traj_points[0] = self.x
+                self.x_d = self.x_d_traj_points[0]
+
                     
             else:
                 # Idle state
