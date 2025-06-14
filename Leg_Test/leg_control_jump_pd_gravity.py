@@ -22,7 +22,7 @@ parser.add_argument('--record', action='store_true', help='Enable data recording
 args = parser.parse_args()
 
 # User-modifiable parameters
-bear_port = 'COM3'
+bear_port = 'COM9'
 sensor_port = 'COM20'
 land_delay_s = 2     # seconds to wait after landing before returning to IDLE
 max_duration_s = 5   # cap recording time
@@ -123,7 +123,6 @@ while True:
         recorded_data.append([current_time, foot_state,
                               q_des[0], q_rad[0], qd_rad_s[0], qd_rad_s[0], u[0], u_meas[0], 
                               q_des[1], q_rad[1], qd_rad_s[1], qd_rad_s[1], u[1], u_meas[1], 
-                              leg.y_acc
                               ])
         if len(recorded_data) > num_samples:
             logger.info("Max duration reached, exiting data collection.")

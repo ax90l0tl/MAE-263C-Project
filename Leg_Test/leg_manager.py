@@ -32,10 +32,10 @@ class legManager:
         self.gpio_state = 0
         self.y_acc = 0
 
-        self.freq = 300
-        self._running = True
-        self._thread = threading.Thread(target=self._imu_polling, daemon=True)
-        self._thread.start()
+        # self.freq = 300
+        # self._running = True
+        # self._thread = threading.Thread(target=self._imu_polling, daemon=True)
+        # self._thread.start()
 
     def _init_imu(self):
         try:
@@ -53,14 +53,15 @@ class legManager:
             new_config.feature = new_config.GPIO_FEATURE  # Set pin as GPIO
             new_config.behavior = new_config.GPIO_INPUT  # Set GPIO pin as input
             node.setGpioConfig(new_config)  # Apply the configuration
-            del node
+            # del node
         except mscl.Error as e:
             print("Error:", e)
             exit(1)
-        connection.disconnect()
-        time.sleep(0.5)
-        ser = serial.Serial(self.sensor_port, 115200)
-        return ser
+        # connection.disconnect()
+        # time.sleep(0.5)
+        # ser = serial.Serial(self.sensor_port, 115200)
+        # return ser
+        return node
     
     def _sync_and_read_packet(self):
         while True:
@@ -96,8 +97,8 @@ class legManager:
         return
     
     def get_foot_sensor_state(self):
-        # return self.imu.getGpioState(self.gpio_pin)
-        return self.gpio_state
+        return self.imu.getGpioState(self.gpio_pin)
+        # return self.gpio_state
     
     def get_imu_data(self):
         return self.y_acc
