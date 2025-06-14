@@ -32,16 +32,6 @@ def calc_z_velocity(q1, q1d, q2, q2d):
     ydot = J21 * q1d + J22 * q2d
 
     return np.stack([xdot, ydot], axis=1)  # shape (N, 2)
-    # end_eff_vel = []
-    # for q, q_dot in zip(joint_angles, joint_velocities):
-    #     q1, q2 = q
-    #     J = np.array([
-    #         [-l1*np.sin(q1) - l2*np.sin(q1 + q2), -l2*np.sin(q1 + q2)],
-    #         [ l1*np.cos(q1) + l2*np.cos(q1 + q2),  l2*np.cos(q1 + q2)]
-    #     ])
-    #     v = J @ q_dot  # matrix multiply
-    #     end_eff_vel.append(v)
-    # return np.array(end_eff_vel)
 
 def plot_shaded_region(ax):
     for start, end in zip(starts, ends):
@@ -49,21 +39,17 @@ def plot_shaded_region(ax):
 
 
 # Load data from CSV file and trim if needed
-filepath = "pd_w_gravity_jump/pd_jump_kp_10_15_kd_0.6_0.6.csv"
-front_trim = 500
-back_trim = 700
+filepath = "pd_w_gravity_jump/matlab_sim_03.csv"
+front_trim = 0
+back_trim = 200
 if not os.path.isfile(filepath):
     raise FileNotFoundError(f"File not found: {filepath}")
-recorded_data = np.loadtxt(filepath, delimiter=',', skiprows=1)
-
-imu_g = recorded_data[:, 14] - 1  # Minus 1g
-
+# recorded_data = np.loadtxt(filepath, delimiter=',', skiprows=1)
+recorded_data = np.genfromtxt(filepath, delimiter=",", dtype=np.float64, filling_values=np.nan)
+recorded_data = recorded_data[~np.isnan(recorded_data).any(axis=1)]
+# print(recorded_data)
 back_trim = len(recorded_data) - back_trim
 recorded_data = recorded_data[front_trim:back_trim]
-
-# Optionally shift IMU data trim to align with recorded_data
-imu_shift = 280  # User can set this to a positive or negative integer to shift alignment
-imu_g = imu_g[front_trim + imu_shift : back_trim + imu_shift]
 
 # Process foot sensor to graph shaded region
 time = recorded_data[:, 0]
@@ -86,13 +72,17 @@ q2d_des = recorded_data[:, 10]
 q2d_meas = recorded_data[:, 11]
 u2_des = recorded_data[:, 12]
 u2_meas = recorded_data[:, 13]
-# imu_g = recorded_data[:, 14] - 1  # Minus 1g
 
-# Integrate IMU reading to get operation-space velocity
-imu_acc = imu_g * 9.81 
-dt = np.diff(time, prepend=time[0])
-# int_vel_z = np.cumsum(imu_acc * dt)
-int_vel_z = cumulative_trapezoid(imu_acc, time, initial=0)
+Z_height = recorded_data[:, 14]
+
+x_des = recorded_data[:, 20]
+xd_des = np.gradient(x_des, time)
+x_meas = recorded_data[:, 21]
+xd_meas = np.gradient(x_meas, time)
+z_des = recorded_data[:, 22]
+zd_des = np.gradient(z_des, time)
+z_meas = recorded_data[:, 23]
+zd_meas = np.gradient(z_meas, time)
 
 # Calculate EE velocity using jacobian
 jac_vel = calc_z_velocity(q1_meas, q1d_meas, q2_meas, q2d_meas)
@@ -106,6 +96,7 @@ for data_point in recorded_data:
     p_meas.append(leg.calculate_FK([data_point[3], data_point[9]]))
 p_des = np.array(p_des)
 p_meas = np.array(p_meas)
+# print(p_des)
 
 
 ######### PLOTTING #########
@@ -120,6 +111,19 @@ for i in range(4):
         if i == 3 and j == 0:
             continue  # Skip axs[3][0] only
         plot_shaded_region(axs[i][j])
+
+# # X
+# axs[0][0].plot(time, x_des, label='Desired', color='tab:blue', linestyle='--', alpha=0.5)
+# axs[0][0].plot(time, x_meas, label='Measured', color='tab:blue')
+# axs[0][0].set_xlabel('Time (s)')
+# axs[0][0].set_ylabel('End Effector X Position (m)')
+# axs[0][0].legend(fontsize=9)
+
+# # X vel
+# axs[1][0].plot(time, xd_des, label='Desired', color='tab:blue', linestyle='--', alpha=0.5)
+# axs[1][0].plot(time, xd_meas, label='Measured', color='tab:blue')
+# axs[1][0].set_xlabel('Time (s)')
+# axs[1][0].set_ylabel('End Effector X Velocity (m/s)')
 
 # Joint 1 Angle
 axs[0][0].plot(time, np.rad2deg(q1_des), label='Desired', color='tab:blue', linestyle='--', alpha=0.5)
@@ -137,7 +141,6 @@ axs[1][0].set_ylabel('Hip Joint Velocity (deg/s)')
 # Joint 1 Torque
 axs[2][0].plot(time, u1_des, label='Desired', color='tab:red', linestyle='--', alpha=0.5)
 axs[2][0].plot(time, u1_meas, label='Measured', color='tab:red')
-axs[2][0].axhline(20, color='black', linestyle='--', linewidth=1)
 axs[2][0].set_xlabel('Time (s)')
 axs[2][0].set_ylabel('Hip Joint Torque (Nm)')
 axs[2][0].legend(fontsize=9)
@@ -158,7 +161,6 @@ axs[1][1].set_ylabel('Knee Joint Velocity (deg/s)')
 # Joint 2 Torque
 axs[2][1].plot(time, u2_des, label='Desired', color='tab:red', linestyle='--', alpha=0.5)
 axs[2][1].plot(time, u2_meas, label='Measured', color='tab:red')
-axs[2][1].axhline(-20, color='black', linestyle='--', linewidth=1)
 axs[2][1].set_xlabel('Time (s)')
 axs[2][1].set_ylabel('Knee Joint Torque (Nm)')
 
@@ -176,13 +178,19 @@ axs[3][0].legend(fontsize=9)
 # axs[3][1].set_xlabel('Time (s)')
 # axs[3][1].set_ylabel('Acceleration in Z (g)')
 
-# Integrated IMU reading
-axs[3][1].plot(time, int_vel_z, label='From IMU', color='tab:brown')
-axs[3][1].plot(time, jac_vel[:, 1], label='From Jacobian', color='tab:olive')
-# axs[3][1].plot(time, np.gradient(p_meas[:, 1], time), label='Velocity by Diff p_meas', color='tab:cyan')
+# # Integrated IMU reading
+# # axs[3][1].plot(time, int_vel_z, label='From IMU', color='tab:brown')
+# axs[3][1].plot(time, jac_vel[:, 1], label='From Jacobian', color='tab:olive')
+# # axs[3][1].plot(time, np.gradient(p_meas[:, 1], time), label='Velocity by Diff p_meas', color='tab:cyan')
+# axs[3][1].set_xlabel('Time (s)')
+# axs[3][1].set_ylabel('Z velocity (m/s)')
+# axs[3][1].legend(fontsize=9)
+
+axs[3][1].plot(time, Z_height, label='From Jacobian', color='tab:brown')
 axs[3][1].set_xlabel('Time (s)')
-axs[3][1].set_ylabel('Z velocity (m/s)')
-axs[3][1].legend(fontsize=9)
+axs[3][1].set_ylabel('Absolute Z height')
+# axs[3][1].legend(fontsize=9)
+
 
 # Add subplot labels A) to H)
 labels = ['A)', 'B)', 'C)', 'D)', 'E)', 'F)', 'G)', 'H)']
